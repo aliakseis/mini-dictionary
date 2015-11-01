@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -15,13 +15,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -30,14 +28,14 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-DICTIONARY              ICON    DISCARDABLE     "DICT.ICO"
+DICTIONARY              ICON                    "DICT.ICO"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-DICTIONARY MENUEX DISCARDABLE 
+DICTIONARY MENUEX
 BEGIN
     POPUP "&Commands",                      65535,MFT_STRING,MFS_ENABLED
     BEGIN
@@ -56,10 +54,8 @@ BEGIN
         MENUITEM "&Settings...",                IDM_SETTINGS,MFT_STRING,MFS_ENABLED
         MENUITEM "&Font...",                    IDM_FONT,MFT_STRING,MFS_ENABLED
     END
-    MENUITEM "|Contents|",                  IDM_CONTENTS_MODE,
-    MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
-    MENUITEM "Search",                      IDM_SEARCH_MODE,
-    MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
+    MENUITEM "|Contents|",                  IDM_CONTENTS_MODE,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
+    MENUITEM "Search",                      IDM_SEARCH_MODE,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
 END
 
 
@@ -68,8 +64,8 @@ END
 // Dialog
 //
 
-SEARCH DIALOG DISCARDABLE  10, 10, 151, 48
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+SEARCH DIALOG 10, 10, 151, 48
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Search"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -79,8 +75,8 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,85,32,50,14
 END
 
-INSERT DIALOG DISCARDABLE  10, 10, 260, 75
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+INSERT DIALOG 10, 10, 260, 75
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Insert match"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -93,8 +89,8 @@ BEGIN
     PUSHBUTTON      "&Apply",ID_APPLY,157,59,50,14
 END
 
-ABOUT DIALOG DISCARDABLE  22, 7, 145, 47
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+ABOUT DIALOG 22, 7, 145, 47
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Dictionary"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -104,36 +100,26 @@ BEGIN
     ICON            "DICTIONARY",IDC_STATIC,4,5,20,20
 END
 
-SETTINGS DIALOG DISCARDABLE  0, 0, 159, 124
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+SETTINGS DIALOGEX 0, 0, 159, 130
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,25,105,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,85,105,50,14
+    DEFPUSHBUTTON   "OK",IDOK,25,113,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,85,113,50,14
     EDITTEXT        IDC_NUM_ROWS,105,8,22,14,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_AUTOBUDDY | UDS_ARROWKEYS,126,8,10,14
-    LTEXT           "Number of rows (has effect after program restart)",
-                    IDC_STATIC,7,7,89,19
-    CONTROL         "Auto cyrillic keyboard",IDC_USE_HOOK,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,28,83,10
-    CONTROL         "Capital Letters",IDC_CAPITAL_LETTERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,41,61,10
-    CONTROL         "Soft Gray",IDC_SOFT_GRAY,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,92,28,45,10
-    CONTROL         "Minimize to Tray",IDC_MINIMIZE_TO_TRAY,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,92,41,67,10
-    GROUPBOX        "Translation of a word under mouse cursor",IDC_STATIC,2,
-                    57,155,40,BS_FLAT
-    CONTROL         "MSIE",IDC_TRANSLATION_IE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,68,33,10
-    CONTROL         "Firefox",IDC_TRANSLATION_FIREFOX,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,81,37,10
-    CONTROL         "Acrobat",IDC_TRANSLATION_ACROBAT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,92,68,41,10
-    CONTROL         "MS Word",IDC_TRANSLATION_MS_WORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,92,81,46,10
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,126,8,10,14
+    LTEXT           "Number of rows (has effect after program restart)",IDC_STATIC,7,7,89,19
+    CONTROL         "Auto cyrillic keyboard",IDC_USE_HOOK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,28,83,10
+    CONTROL         "Capital Letters",IDC_CAPITAL_LETTERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,41,61,10
+    CONTROL         "Soft Gray",IDC_SOFT_GRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,28,45,10
+    CONTROL         "Minimize to Tray",IDC_MINIMIZE_TO_TRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,41,67,10
+    GROUPBOX        "Translation of a word under mouse cursor",IDC_STATIC,2,57,155,50,BS_FLAT
+    CONTROL         "MSIE",IDC_TRANSLATION_IE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,68,33,10
+    CONTROL         "Firefox",IDC_TRANSLATION_FIREFOX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,81,37,10
+    CONTROL         "Acrobat",IDC_TRANSLATION_ACROBAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,68,41,10
+    CONTROL         "MS Word",IDC_TRANSLATION_MS_WORD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,81,46,10
+    CONTROL         "Chrome",IDC_TRANSLATION_CHROME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,94,40,10
 END
 
 
@@ -143,12 +129,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE MOVEABLE PURE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE MOVEABLE PURE 
+2 TEXTINCLUDE 
 BEGIN
     "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
     "#include ""windows.h""\r\n"
@@ -156,7 +142,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE MOVEABLE PURE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
@@ -171,7 +157,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO MOVEABLE PURE 
+GUIDELINES DESIGNINFO
 BEGIN
     SEARCH, DIALOG
     BEGIN
@@ -188,7 +174,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 152
         TOPMARGIN, 7
-        BOTTOMMARGIN, 120
+        BOTTOMMARGIN, 126
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -196,12 +182,11 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Data
+// RCDATA
 //
 
-IDR_PICTURE             RCDATA  MOVEABLE PURE   "panorama.jpg"
+IDR_PICTURE             RCDATA                  "panorama.jpg"
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -224,13 +209,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "FileDescription", "dict\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "dict\0"
-            VALUE "LegalCopyright", "Copyright © 2005\0"
-            VALUE "OriginalFilename", "dict.exe\0"
-            VALUE "ProductName", "Dictionary Application\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "FileDescription", "dict"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "dict"
+            VALUE "LegalCopyright", "Copyright © 2005"
+            VALUE "OriginalFilename", "dict.exe"
+            VALUE "ProductName", "Dictionary Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -239,9 +224,7 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

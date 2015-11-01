@@ -47,48 +47,14 @@ LPCSTR GetTempFilePath()
 	return g_szTempPath;
 }
 
-#pragma warning(disable:4035)
-int CompareStrings(const void *key1, const void *key2) 
+int CompareStrings(const unsigned char *key1, const unsigned char *key2) 
 {
-	_asm 
-	{
-		push	esi
-		push	edi
-		cld
-		mov esi,key1
-		mov	edi,key2
-		lodsb
-		mov     ah,[edi]
-		inc     edi
-		xor     ecx,ecx
-		cmp     al,ah
-		jb      l1
-		mov     cl,ah
-		jmp     l2
-l1:
-		mov     cl,al
-l2:
-		repe	cmpsb
-		jz      l3
-		mov	al,[esi-1]
-		mov	ah,[edi-1]
-l3:
-		cmp	al,ah
-
-		je l4
-
-		sbb eax, eax
-		or eax, 1
-		jmp l5
-l4:
-		xor eax, eax
-l5:
-		pop	edi
-		pop	esi
-	}
+	size_t size1 = *key1++, size2 = *key2++;
+	int result = memcmp(key1, key2, min(size1, size2));
+	if (0 == result)
+		result = size1 - size2;
+	return result;
 }
-#pragma warning(default:4035)
-
 
 
 void DecodeDifference(unsigned int nEncodedDiff, unsigned int nPrevLen,
@@ -150,7 +116,7 @@ inline bool IsGreater(const mystring left, const mystring right)
 
 int mycollection::compare(void *key1, void *key2) 
 {
-	return CompareStrings(key1, key2);
+	return CompareStrings((const unsigned char*) key1, (const unsigned char*) key2);
 }
 
 mydict::mydict(const char* pth):mycollection(512) 
@@ -1006,6 +972,8 @@ Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
 {
 	if (pins == NULL) 
 		pins = new(nothrow) myinsertrec;
+    if (pins == NULL)
+        exit(0);
 	compfunc(pins->myssample,ss);
 	if (pins->myssample[0] == 0) 
 		return EMPTY_STRING;
@@ -1135,14 +1103,13 @@ void mydict::insertstr(char *ss,Ident ident)
 		insertbyfind(ident);
 }
 
-#pragma warning(disable:4035)
-inline DWORD ByteSwap(DWORD dwX) 
-{ 
-	_asm    mov     eax, dwX 
-	_asm    bswap   eax 
+inline unsigned short bswap_16(unsigned short x) {
+	return (x>>8) | (x<<8);
 }
-#pragma warning(default:4035)
 
+inline DWORD ByteSwap(DWORD x) {
+	return (bswap_16(x&0xffff)<<16) | (bswap_16(x>>16));
+}
 
 int mycomp(BYTE *res,BYTE *source, const BYTE *table_, int nSymbols)
 {

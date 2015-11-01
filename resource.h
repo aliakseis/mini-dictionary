@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by dict.rc
 //
 #define SEARCH                          1
@@ -34,6 +34,7 @@
 #define IDC_TRANSLATION_FIREFOX         1010
 #define IDC_TRANSLATION_ACROBAT         1011
 #define IDC_TRANSLATION_MS_WORD         1012
+#define IDC_TRANSLATION_CHROME          1013
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

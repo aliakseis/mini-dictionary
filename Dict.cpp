@@ -327,7 +327,7 @@ HFONT g_hFont;
 
 search_buf g_szSearchStr;
 
-BOOL CALLBACK SearchStrDlgProc(HWND hDlg, UINT iMessage,
+INT_PTR CALLBACK SearchStrDlgProc(HWND hDlg, UINT iMessage,
 WPARAM wParam, LPARAM lParam)
 {
 	//HFONT hfontDlg;
@@ -374,7 +374,7 @@ search_buf g_szLeftStr, g_szRightStr;
 
 BOOL g_bLeftCyrillic;
 
-BOOL CALLBACK InsertDlgProc(HWND hDlg, UINT iMessage,
+INT_PTR CALLBACK InsertDlgProc(HWND hDlg, UINT iMessage,
 WPARAM wParam, LPARAM)
 {             
 	//HFONT hfontDlg;
@@ -433,7 +433,7 @@ WPARAM wParam, LPARAM)
 	return(TRUE);
 }
 
-BOOL CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM)
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM)
 {
 	switch (message)
 	{
@@ -464,7 +464,6 @@ BOOL CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM)
 	return(FALSE);
 }
 
-const char szIniFilename[] = "Dictionr.ini";
 const char szFontSection[] = "Font";
 const char szSettingsSection[] = "Settings";
 
@@ -491,7 +490,20 @@ const int g_arrTranslationOptions[] =
 	IDC_TRANSLATION_FIREFOX, 
 	IDC_TRANSLATION_ACROBAT,
 	IDC_TRANSLATION_MS_WORD,
- };
+	IDC_TRANSLATION_CHROME,
+};
+
+const char* GetIniFilename()
+{
+    static char iniFilename[_MAX_PATH];
+    if (!iniFilename[0])
+    {
+        GetExeDir(iniFilename);
+        strcat(iniFilename, "dictionary.ini");
+    }
+
+    return iniFilename;
+}
 
 BOOL WriteProfileInt(const char* lpAppName,  // section name
 					const char* lpKeyName,  // key name
@@ -499,11 +511,11 @@ BOOL WriteProfileInt(const char* lpAppName,  // section name
 {
 	char szBuf[18];
 	itoa(nValue, szBuf, 10);
-	return WritePrivateProfileString(lpAppName, lpKeyName, szBuf, szIniFilename);
+    return WritePrivateProfileString(lpAppName, lpKeyName, szBuf, GetIniFilename());
 }
 
 
-BOOL CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM)
+INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM)
 {  
 	char szBuf[18];
 	switch (iMessage)
@@ -515,7 +527,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM)
 			SendDlgItemMessage(hDlg, IDC_NUM_ROWS, EM_LIMITTEXT, 2, 0);
 			SendDlgItemMessage(hDlg, IDC_SPIN1, UDM_SETRANGE, 0, (LPARAM) MAKELONG(99, 2)); 
 			GetPrivateProfileString(szSettingsSection, szNumRows, 
-				szDefNumRows, szBuf, 3, szIniFilename);
+                szDefNumRows, szBuf, 3, GetIniFilename());
 			SetDlgItemText(hDlg, IDC_NUM_ROWS, szBuf);
 			SendDlgItemMessage(hDlg, IDC_USE_HOOK, BM_SETCHECK, g_bUseHook, 0);
 			SendDlgItemMessage(hDlg, IDC_CAPITAL_LETTERS, BM_SETCHECK, g_bCapitalLetters, 0);
@@ -547,7 +559,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM)
 			break;
 		case IDOK:
 			GetDlgItemText(hDlg, IDC_NUM_ROWS, szBuf, 3);
-			WritePrivateProfileString(szSettingsSection, szNumRows, szBuf, szIniFilename);
+            WritePrivateProfileString(szSettingsSection, szNumRows, szBuf, GetIniFilename());
 			g_bUseHook = SendDlgItemMessage(hDlg, IDC_USE_HOOK, BM_GETCHECK, 0, 0);
 			WriteProfileInt(szSettingsSection, szUseHook, !!g_bUseHook);
 
@@ -587,7 +599,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM)
 }
 
 
-unsigned int CALLBACK CFHookProc(
+UINT_PTR CALLBACK CFHookProc(
   HWND hDlg,      // handle to dialog box
   UINT uiMsg,     // message identifier
   WPARAM //wParam,  // message parameter
@@ -1018,7 +1030,7 @@ public:
 			WriteProfileInt(szFontSection, szHeight, g_lf.lfHeight);
 			WriteProfileInt(szFontSection, szWeight, g_lf.lfWeight);
 			WritePrivateProfileString(szFontSection, szFaceName, g_lf.lfFaceName, 
-				szIniFilename);
+                GetIniFilename());
 			WriteProfileInt(szFontSection, szCharSet, g_lf.lfCharSet);
 
 			if (g_hFont)
@@ -1108,7 +1120,7 @@ const char MainWindow::szClassName[] = "Dictionary";
 const char szAbout[]	= "&About";
 
 MainWindow::MainWindow()
-: m_NumRows(GetPrivateProfileInt(szSettingsSection, szNumRows, 10, szIniFilename))
+    : m_NumRows(GetPrivateProfileInt(szSettingsSection, szNumRows, 10, GetIniFilename()))
 {
 	m_ident = 0;
 	m_filterMode = false;
@@ -1132,6 +1144,19 @@ MainWindow::MainWindow()
 	};
 	CWindowImpl<MainWindow>::Create( NULL, rcPos, szClassName,
       WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX|WS_VSCROLL);
+
+    // Fix size
+    RECT clientRect;
+    GetClientRect(&clientRect);
+    RECT windowRect;
+    GetWindowRect(&windowRect);
+    SetWindowPos(
+        NULL,
+        0,
+        0,
+        (windowRect.right - windowRect.left) + WIDTH - (clientRect.right - clientRect.left),
+        (windowRect.bottom - windowRect.top) + INTERLIN * m_NumRows + 7 - (clientRect.bottom - clientRect.top),
+        SWP_NOMOVE | SWP_NOZORDER);
 
 	m_st_left = new(nothrow) search_buf[m_NumRows];
 	m_st_right = new(nothrow) search_buf[m_NumRows];
@@ -1167,25 +1192,25 @@ MainWindow::MainWindow()
 	AppendMenu(hSystemMenu, MF_STRING, IDM_ABOUT, szAbout);
 
 	m_popup = GetSubMenu(GetMenu(), 0);
-	g_lf.lfHeight = GetPrivateProfileInt(szFontSection, szHeight, 14, szIniFilename);
-	g_lf.lfWeight = GetPrivateProfileInt(szFontSection, szWeight, 700, szIniFilename); 
+    g_lf.lfHeight = GetPrivateProfileInt(szFontSection, szHeight, 14, GetIniFilename());
+    g_lf.lfWeight = GetPrivateProfileInt(szFontSection, szWeight, 700, GetIniFilename());
 	g_lf.lfPitchAndFamily = 2;
-	GetPrivateProfileString(szFontSection, szFaceName, szSystem, g_lf.lfFaceName, LF_FACESIZE, szIniFilename);
-	g_lf.lfCharSet = (BYTE)GetPrivateProfileInt(szFontSection, szCharSet, RUSSIAN_CHARSET, szIniFilename); 
+    GetPrivateProfileString(szFontSection, szFaceName, szSystem, g_lf.lfFaceName, LF_FACESIZE, GetIniFilename());
+    g_lf.lfCharSet = (BYTE)GetPrivateProfileInt(szFontSection, szCharSet, RUSSIAN_CHARSET, GetIniFilename());
 
 	if (!g_hFont)
 		g_hFont = CreateFontIndirect(&g_lf);
 
-	g_bUseHook = GetPrivateProfileInt(szSettingsSection, szUseHook, TRUE, szIniFilename); 
-	g_bCapitalLetters = GetPrivateProfileInt(szSettingsSection, szCapitalLetters, FALSE, szIniFilename); 
-	g_bSoftGray = GetPrivateProfileInt(szSettingsSection, szSoftGray, TRUE, szIniFilename); 
+    g_bUseHook = GetPrivateProfileInt(szSettingsSection, szUseHook, TRUE, GetIniFilename());
+    g_bCapitalLetters = GetPrivateProfileInt(szSettingsSection, szCapitalLetters, FALSE, GetIniFilename());
+    g_bSoftGray = GetPrivateProfileInt(szSettingsSection, szSoftGray, TRUE, GetIniFilename());
 	if (IsOleAccAvailable())
 	{
-		g_nTranslationBalloon = GetPrivateProfileInt(szSettingsSection, szTranslationBalloon, 0, szIniFilename);
+        g_nTranslationBalloon = GetPrivateProfileInt(szSettingsSection, szTranslationBalloon, 0, GetIniFilename());
 		if (g_nTranslationBalloon)
 			SetTimer(IDEVT_TRANSLATION_BALLOON, 700);
 	}
-	g_bMinimizeToTray = GetPrivateProfileInt(szSettingsSection, szMinimizeToTray, FALSE, szIniFilename); 
+    g_bMinimizeToTray = GetPrivateProfileInt(szSettingsSection, szMinimizeToTray, FALSE, GetIniFilename());
 
 	ResetPage();
 	putfirst("");
@@ -2307,7 +2332,8 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 
 		// Do the standard tooltip coding. 
 			TTTOOLINFOW	ti = { 
-				sizeof(TTTOOLINFOW),
+				//sizeof(TTTOOLINFOW),
+				offsetof(TTTOOLINFOW, lParam),
 				TTF_TRANSPARENT | TTF_CENTERTIP,
 				hWndChild
 			};
@@ -2348,52 +2374,55 @@ CComModule _Module;
 #endif
 
 
-int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
-	::CreateMutex(NULL, FALSE, "9B46C260-D121-461d-ACA9-D15681658A95");
-	DWORD dwLastError = ::GetLastError();
-	if (dwLastError == ERROR_ALREADY_EXISTS)
-	{
-		HWND hWndOther = FindWindow(MainWindow::szClassName, MainWindow::szClassName);
-		if(hWndOther != NULL)
-		{
-			ShowWindow(hWndOther, SW_SHOW);
-			SetForegroundWindow(hWndOther);
-		}
-		return 0;
-	}
+    ::CreateMutex(NULL, FALSE, "9B46C260-D121-461d-ACA9-D15681658A95");
+    DWORD dwLastError = ::GetLastError();
+    if (dwLastError == ERROR_ALREADY_EXISTS)
+    {
+        HWND hWndOther = FindWindow(MainWindow::szClassName, MainWindow::szClassName);
+        if (hWndOther != NULL)
+        {
+            ShowWindow(hWndOther, SW_SHOW);
+            SetForegroundWindow(hWndOther);
+        }
+        return 0;
+    }
 
-	g_hInstance = hInstance;
+    g_hInstance = hInstance;
 
-	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF);
+    _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF);
 
-	CoInitialize(NULL);
-    InitCommonControls();              
-
-#if _ATL_VER < 0x0700
-	_Module.Init( NULL, hInstance );
-#endif
-
-   MainWindow* pWnd = new(nothrow) MainWindow;
-
-   pWnd->ShowWindow(nCmdShow);
-
-   MSG msg;
-   while( GetMessage( &msg, NULL, 0, 0 ) )
-   {
-      TranslateMessage( &msg );
-      DispatchMessage( &msg );
-   }
-
-	delete pWnd;
+    const bool coUnitialize = S_OK == CoInitialize(NULL);
+    InitCommonControls();
 
 #if _ATL_VER < 0x0700
-   _Module.Term();
+    _Module.Init( NULL, hInstance );
 #endif
 
-    CoUninitialize();
+    MainWindow* pWnd = new(nothrow)MainWindow;
 
-	_CrtDumpMemoryLeaks();
+    pWnd->ShowWindow(nCmdShow);
 
-   return msg.wParam;
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    delete pWnd;
+
+#if _ATL_VER < 0x0700
+    _Module.Term();
+#endif
+
+    if (coUnitialize)
+    {
+        CoUninitialize();
+    }
+
+    _CrtDumpMemoryLeaks();
+
+    return msg.wParam;
 }

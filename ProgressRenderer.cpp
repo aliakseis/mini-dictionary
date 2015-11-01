@@ -217,28 +217,30 @@ CProgressRenderer::CProgressRenderer()
                     (void**)&m_spPicture // [out] IPictire object on success
                     );
 
-    if (m_spPicture)
+    if (SUCCEEDED(hr) && m_spPicture)
     {
         OLE_HANDLE handle = NULL;
         m_spPicture->get_Handle(&handle);
 
         BITMAP bm;
         BOOL res = GetObject((HGDIOBJ)handle, sizeof(BITMAP), &bm);
+        if (res)
+        {
+            m_nWidth = bm.bmWidth;
+            m_nHeight = bm.bmHeight;
 
-        m_nWidth = bm.bmWidth;
-        m_nHeight = bm.bmHeight;
+            m_hbmDst = Create24BPPDIBSection(NULL, m_nWidth, m_nHeight);
+            m_hdcDst = CreateCompatibleDC(NULL);
+            SelectObject(m_hdcDst, m_hbmDst);
 
-        m_hbmDst  = Create24BPPDIBSection(NULL, m_nWidth, m_nHeight);
-        m_hdcDst  = CreateCompatibleDC(NULL);
-        SelectObject(m_hdcDst,  m_hbmDst);
+            m_hdcSrc = CreateCompatibleDC(NULL);
+            SelectObject(m_hdcSrc, (HGDIOBJ)handle);
 
-        m_hdcSrc = CreateCompatibleDC(NULL);
-        SelectObject(m_hdcSrc, (HGDIOBJ)handle);
+            BitBlt(m_hdcDst, 0, 0, m_nWidth, m_nHeight,
+                m_hdcSrc, 0, 0, SRCCOPY);
 
-        BitBlt(m_hdcDst, 0, 0, m_nWidth, m_nHeight, 
-               m_hdcSrc, 0, 0, SRCCOPY);
-
-        GrayImage(m_hbmDst);
+            GrayImage(m_hbmDst);
+        }
     }
 }
 

@@ -100,6 +100,128 @@ ISimpleDOMText_ : IUnknown
 };
 
 
+typedef struct IA2TextSegment
+    {
+    BSTR text;
+    long start;
+    long end;
+    } 	IA2TextSegment;
+
+enum  	IA2CoordinateType {
+    IA2_COORDTYPE_SCREEN_RELATIVE,
+    IA2_COORDTYPE_PARENT_RELATIVE
+};
+
+
+enum IA2TextBoundaryType
+    {	IA2_TEXT_BOUNDARY_CHAR	= 0,
+	IA2_TEXT_BOUNDARY_WORD	= ( IA2_TEXT_BOUNDARY_CHAR + 1 ) ,
+	IA2_TEXT_BOUNDARY_SENTENCE	= ( IA2_TEXT_BOUNDARY_WORD + 1 ) ,
+	IA2_TEXT_BOUNDARY_PARAGRAPH	= ( IA2_TEXT_BOUNDARY_SENTENCE + 1 ) ,
+	IA2_TEXT_BOUNDARY_LINE	= ( IA2_TEXT_BOUNDARY_PARAGRAPH + 1 ) ,
+	IA2_TEXT_BOUNDARY_ALL	= ( IA2_TEXT_BOUNDARY_LINE + 1 ) 
+    } ;
+
+struct __declspec(uuid("24FD2FFB-3AAD-4a08-8335-A3AD89C0FB4B"))
+IAccessibleText_ : public IUnknown
+{
+public:
+    virtual HRESULT STDMETHODCALLTYPE addSelection( 
+        /* [in] */ long startOffset,
+        /* [in] */ long endOffset) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_attributes( 
+        /* [in] */ long offset,
+        /* [out] */ long *startOffset,
+        /* [out] */ long *endOffset,
+        /* [retval][out] */ BSTR *textAttributes) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_caretOffset( 
+        /* [retval][out] */ long *offset) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_characterExtents( 
+        /* [in] */ long offset,
+        /* [in] */ enum IA2CoordinateType coordType,
+        /* [out] */ long *x,
+        /* [out] */ long *y,
+        /* [out] */ long *width,
+        /* [retval][out] */ long *height) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_nSelections( 
+        /* [retval][out] */ long *nSelections) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_offsetAtPoint( 
+        /* [in] */ long x,
+        /* [in] */ long y,
+        /* [in] */ enum IA2CoordinateType coordType,
+        /* [retval][out] */ long *offset) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_selection( 
+        /* [in] */ long selectionIndex,
+        /* [out] */ long *startOffset,
+        /* [retval][out] */ long *endOffset) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_text( 
+        /* [in] */ long startOffset,
+        /* [in] */ long endOffset,
+        /* [retval][out] */ BSTR *text) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_textBeforeOffset( 
+        /* [in] */ long offset,
+        /* [in] */ enum IA2TextBoundaryType boundaryType,
+        /* [out] */ long *startOffset,
+        /* [out] */ long *endOffset,
+        /* [retval][out] */ BSTR *text) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_textAfterOffset( 
+        /* [in] */ long offset,
+        /* [in] */ enum IA2TextBoundaryType boundaryType,
+        /* [out] */ long *startOffset,
+        /* [out] */ long *endOffset,
+        /* [retval][out] */ BSTR *text) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_textAtOffset( 
+        /* [in] */ long offset,
+        /* [in] */ enum IA2TextBoundaryType boundaryType,
+        /* [out] */ long *startOffset,
+        /* [out] */ long *endOffset,
+        /* [retval][out] */ BSTR *text) = 0;
+        
+    virtual HRESULT STDMETHODCALLTYPE removeSelection( 
+        /* [in] */ long selectionIndex) = 0;
+        
+    virtual HRESULT STDMETHODCALLTYPE setCaretOffset( 
+        /* [in] */ long offset) = 0;
+        
+    virtual HRESULT STDMETHODCALLTYPE setSelection( 
+        /* [in] */ long selectionIndex,
+        /* [in] */ long startOffset,
+        /* [in] */ long endOffset) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_nCharacters( 
+        /* [retval][out] */ long *nCharacters) = 0;
+        
+    virtual HRESULT STDMETHODCALLTYPE scrollSubstringTo( 
+        /* [in] */ long startIndex,
+        /* [in] */ long endIndex,
+        /* [in] */ enum IA2ScrollType scrollType) = 0;
+        
+    virtual HRESULT STDMETHODCALLTYPE scrollSubstringToPoint( 
+        /* [in] */ long startIndex,
+        /* [in] */ long endIndex,
+        /* [in] */ enum IA2CoordinateType coordinateType,
+        /* [in] */ long x,
+        /* [in] */ long y) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_newText( 
+        /* [retval][out] */ IA2TextSegment *newText) = 0;
+        
+    virtual /* [propget] */ HRESULT STDMETHODCALLTYPE get_oldText( 
+        /* [retval][out] */ IA2TextSegment *oldText) = 0;
+        
+};
+
+
 struct __declspec(uuid("5007373a-20d7-458f-9ffb-abc900e3a831")) 
 IPDDomNode : IDispatch
 {
@@ -199,6 +321,8 @@ IGetPDDomNode : IUnknown
 static const GUID SID_GetPDDomNode = 
 { 0xc0a1d5e9, 0x1142, 0x4cf3, { 0xb6, 0x7, 0x82, 0xfc, 0x3b, 0x96, 0xa4, 0xdf } };
 
+struct __declspec(uuid("E89F726E-C4F4-4c19-BB19-B647D7FA8478")) IAccessible2;
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -253,7 +377,7 @@ CComPtr<IServiceProvider> GetServiceProvider(HWND hWnd, POINT& pt, bool isIE = f
 
 	// Send WM_GETOBJECT to document window
 	if (!SendMessageTimeout( hWnd, WM_GETOBJECT, 0L, OBJID_CLIENT,
-						SMTO_ABORTIFHUNG, 500, (DWORD*)&lRes )
+						SMTO_ABORTIFHUNG, 500, (PDWORD_PTR) &lRes )
 			|| 0 == lRes)
 		return 0;
 
@@ -309,6 +433,18 @@ public:
 		POINT pt,
 		char*& rpszWord, char*& rpszText);
 };
+
+class ChromeTextExtractor : public ITextExtractor
+{
+public:
+	enum { EXTRACT_TYPE = EXTRACT_TYPE_CHROME };
+	static const char g_szClassName[];
+
+	virtual bool ExtractText(HWND hWnd,
+		POINT pt,
+		char*& rpszWord, char*& rpszText);
+};
+
 
 class AdobeAcrobatTextExtractor : public ITextExtractor
 {
@@ -513,6 +649,73 @@ bool MozillaFirefoxTextExtractor::ExtractText(
 	return true;
 }
 
+
+bool ChromeTextExtractor::ExtractText(
+		HWND hWnd, 
+		POINT pt,
+		char*& rpszWord, char*& rpszText)
+{
+	CComPtr<IServiceProvider> pServiceProvider(GetServiceProvider(hWnd, pt));
+	if (!pServiceProvider)
+		return false;
+
+	CComPtr<IAccessibleText_> spAccessibleText;
+	HRESULT hr = pServiceProvider->QueryService(__uuidof(IAccessibleText_), __uuidof(IAccessibleText_), 
+				(void **)&spAccessibleText);
+	if (FAILED(hr) || !spAccessibleText)
+		return false;
+
+    LONG length = 0;
+    hr = spAccessibleText->get_nCharacters(&length);
+    if (FAILED(hr))
+        return false;
+
+    int l = 0;
+    int h = length - 1;
+    while (l <= h)
+    {
+        int i = (l + h) >> 1;
+
+        LONG x, y, width, height;
+        x = y = width = height = 0;
+        while (i >= l
+            && (spAccessibleText->get_characterExtents(i, IA2_COORDTYPE_SCREEN_RELATIVE,
+            &x,
+            &y,
+            &width,
+            &height)
+            , 0 == x && 0 == y && 0 == width && 0 == height))
+            --i;
+
+        if (i < l || (pt.y >= y + height || pt.y >= y && pt.x >= x))
+            l = ((l + h) >> 1) + 1;
+        else
+            h = i - 1;
+    }
+
+    if (h < 0)
+        return false;
+
+    const long offset = h;
+
+	CComBSTR bstrWord;
+	long startOffset(0), endOffset(0);
+    hr = spAccessibleText->get_textAtOffset(offset, IA2_TEXT_BOUNDARY_WORD, &startOffset, &endOffset, &bstrWord);
+    if (FAILED(hr) || !bstrWord)
+		return false;
+
+    CComBSTR bstrText;
+    hr = spAccessibleText->get_text(startOffset, min(startOffset + 1000, length), &bstrText);
+    if (FAILED(hr) || !bstrText)
+        return false;
+
+    rpszWord = W2A_(bstrWord);
+    rpszText = W2A_(bstrText);
+
+	return true;
+}
+
+
 bool AdobeAcrobatTextExtractor::ExtractText(
 		HWND hWnd, 
 		POINT pt,
@@ -621,7 +824,7 @@ bool MsWordTextExtractor::ExtractText(
 	LRESULT lRes = 0;
 	// Send WM_GETOBJECT to document window
 	if (!SendMessageTimeout(hWnd, WM_GETOBJECT, 0L, OBJID_NATIVEOM,
-						SMTO_ABORTIFHUNG, 500, (DWORD*)&lRes )
+						SMTO_ABORTIFHUNG, 500, (PDWORD_PTR) &lRes )
 			|| 0 == lRes)
 		return 0;
 
@@ -712,6 +915,7 @@ bool MsWordTextExtractor::ExtractText(
 
 const char InternetExplorerTextExtractor::g_szClassName[] = "Internet Explorer_Server"; 
 const char MozillaFirefoxTextExtractor::g_szClassName[]  = "MozillaWindowClass";
+const char ChromeTextExtractor::g_szClassName[]  = "Chrome_RenderWidgetHostHWND";
 const char AdobeAcrobatTextExtractor::g_szClassName[]  = "AVL_AVView";
 const char MsWordTextExtractor::g_szClassName[]  = "_WwG";
 
@@ -753,8 +957,9 @@ ITextExtractor* GetTextExtractor(HWND hWnd, int nTypes)
 	return 
 		ExtractorHandler<InternetExplorerTextExtractor,
 		ExtractorHandler<MozillaFirefoxTextExtractor,
+		ExtractorHandler<ChromeTextExtractor,
 		ExtractorHandler<AdobeAcrobatTextExtractor,
-		ExtractorHandler<MsWordTextExtractor, NullHandler> > > >
+		ExtractorHandler<MsWordTextExtractor, NullHandler> > > > >
 			::Get(nTypes, szBufrer, classNameLength);
 }
 
