@@ -1,5 +1,4 @@
-#if !defined( __DICTLIB_H )
-#define __DICTLIB_H
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -428,5 +427,3 @@ class myrusdict:public mydict
  private:
 	void CommonConstruct();
 };
-
-#endif

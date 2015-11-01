@@ -135,7 +135,6 @@ private:
 	char filename[_MAX_PATH];
 	void setlimit(int aLimit);
 };
-//const char wColl::filename[]="DELLIST.TMP";
 
 int wColl::load()
 {
@@ -330,14 +329,12 @@ search_buf g_szSearchStr;
 INT_PTR CALLBACK SearchStrDlgProc(HWND hDlg, UINT iMessage,
 WPARAM wParam, LPARAM lParam)
 {
-	//HFONT hfontDlg;
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
 		CenterWindow(hDlg);
 		InsertFrame(hDlg);
 		SendDlgItemMessage(hDlg, IDD_SEARCHSTR, EM_LIMITTEXT, BUFFER_MAX, 0L);
-		//hfontDlg = CreateFontIndirect(&g_lf);
 		if (g_hFont) 
 			SendDlgItemMessage(hDlg, IDD_SEARCHSTR, WM_SETFONT,
 			(WPARAM) g_hFont, 0);
@@ -377,7 +374,6 @@ BOOL g_bLeftCyrillic;
 INT_PTR CALLBACK InsertDlgProc(HWND hDlg, UINT iMessage,
 WPARAM wParam, LPARAM)
 {             
-	//HFONT hfontDlg;
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
@@ -385,7 +381,6 @@ WPARAM wParam, LPARAM)
 		InsertFrame(hDlg);
 		SendDlgItemMessage(hDlg, IDD_LEFTSTR, EM_LIMITTEXT, BUFFER_MAX, 0L);
 		SendDlgItemMessage(hDlg, IDD_RIGHTSTR, EM_LIMITTEXT, BUFFER_MAX, 0L);
-		//hfontDlg = CreateFontIndirect(&g_lf);
 		if (g_hFont) 
 		{
 			SendDlgItemMessage(hDlg, IDD_LEFTSTR, WM_SETFONT,
@@ -658,7 +653,7 @@ public:
       static CWndClassInfo wc =
       {
          { 
-			 sizeof(WNDCLASSEX), CS_HREDRAW | CS_VREDRAW /*| CS_DBLCLKS*/, 
+			 sizeof(WNDCLASSEX), CS_HREDRAW | CS_VREDRAW, 
             StartWindowProc,
             0, 0, NULL, 
 			LoadIcon(g_hInstance, szClassName), 
@@ -823,7 +818,7 @@ public:
 		if (WM_LBUTTONUP == lParam)
 		{
 			Shell_NotifyIcon( NIM_DELETE, &g_tnd ); // delete from the status area
-			ShowWindow( SW_SHOW );//SW_RESTORE );
+			ShowWindow( SW_SHOW );
 			SetForegroundWindow(*this);
 			return 0;
 		}
@@ -1105,10 +1100,6 @@ private:
 
     IRenderer* m_pRenderer;
 
-//	POINT m_cursorPos;
-//	bool m_bStillCursor;
-//	HWND m_hwndToolTip;
-
 	BOOL SearchDlg();
 	void SetFilterMode(bool filter = false);
 
@@ -1130,10 +1121,6 @@ MainWindow::MainWindow()
 	m_bufptr = 0;
 
     m_pRenderer = NULL;
-
-//	memset(&m_cursorPos, 0, sizeof(m_cursorPos));
-//	m_bStillCursor = false;
-//	m_hwndToolTip = NULL;
 
 	RECT rcPos = { 
 	   CW_USEDEFAULT,
@@ -1294,7 +1281,7 @@ LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 
 	    UINT uiAlignOld = SetTextAlign(ps.hdc, TA_LEFT | TA_BASELINE);
 	    HPEN hOldpen = (HPEN)SelectObject(ps.hdc,CreatePen(PS_DOT, 1, 0));
-	    HFONT hFontold = (HFONT)SelectObject(ps.hdc, g_hFont);//CreateFontIndirect(&g_lf));
+	    HFONT hFontold = (HFONT)SelectObject(ps.hdc, g_hFont);
 	    SetBkMode(ps.hdc, TRANSPARENT);
 	    int len;
 	    for (i=0; i<m_bufptr; i++) 
@@ -1324,8 +1311,7 @@ LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 			    LineTo(ps.hdc, size.cx + m_splitterPos, i*INTERLIN+18);
 		    }                                       
 	    SetROP2(ps.hdc, iOldROP);
-	    //DeleteObject(
-		    SelectObject(ps.hdc,hFontold);//);
+		SelectObject(ps.hdc,hFontold);
 	    SetTextAlign(ps.hdc, uiAlignOld);
 
 	    rect.left++;
@@ -1817,8 +1803,7 @@ void MainWindow::tag()
 		GetTextExtentPoint32(DC, m_st_right[m_ip], strlen(m_st_right[m_ip]), &size);
 		LineTo(DC, size.cx + m_splitterPos, m_ip*INTERLIN+18);
 		SetROP2(DC, iOldROP);
-		//DeleteObject(
-			SelectObject(DC,hFontold);//);
+		SelectObject(DC,hFontold);
 		ReleaseDC(DC);
 		EnableMenuItem(m_popup, IDM_DELETE, (m_wcoll.getcount())? MF_ENABLED: MF_GRAYED);
 	}
@@ -1968,8 +1953,6 @@ void MainWindow::import()
 
 	for(bool bLast = true;; bLast = false)
 	{
-//        PumpPaintMsg();
-
 		while (pPos > pBuf && *pPos != '\t' && *pPos != 0)
 			--pPos;
 
@@ -2260,7 +2243,6 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 	if (IsMouseButtonDown())
 		return 0;
             
-	//HWND 
 	hWndChild = WindowFromPoint(pt);
 
 	char* pszWord = 0;
@@ -2332,7 +2314,6 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 
 		// Do the standard tooltip coding. 
 			TTTOOLINFOW	ti = { 
-				//sizeof(TTTOOLINFOW),
 				offsetof(TTTOOLINFOW, lParam),
 				TTF_TRANSPARENT | TTF_CENTERTIP,
 				hWndChild

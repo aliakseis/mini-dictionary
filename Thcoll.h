@@ -1,6 +1,4 @@
-#if !defined( __THCOLL_H )
-#define __THCOLL_H
-
+#pragma once
 
 typedef bool (*ccTestFunc)( void*, void* );
 typedef void (*ccAppFunc)( void*, void* );
@@ -46,7 +44,6 @@ protected:
     void* *items;
     int count;
     int limit;
-    bool shouldDelete;
 
 	void* buffer[FAST_BUFFER_SIZE];
 };
@@ -73,5 +70,3 @@ protected:
 			return (key1 > key2)? 1 : 0;
 	}
 };
-
-#endif // __THCOLL_H

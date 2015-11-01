@@ -7,7 +7,6 @@
 #pragma intrinsic(memcpy, memset, memcmp, strlen, strcat)
 
 static const char id[]="AS";
-//static const char tempname[]="DCT.TMP";
 
 
 inline size_t strlenx(const char *string)
@@ -162,7 +161,6 @@ Ident mydict::memo_load()
 	_lread(f, (LPSTR)&flags, 2);
 	_lread(f, (LPSTR)&realsize, 2);
 
-//	wb += (realsize & 0xE000) << 3;
 	// backward compatibility
 	if (realsize & 0xE000)
 		flags = 0;
@@ -216,7 +214,6 @@ Ident mydict::medi_load()
 	_lread(fhandle, (LPSTR)&flags, 2);
 	_lread(fhandle, (LPSTR)&realsize, 2);
 
-//	wb += (realsize & 0xE000) << 3;
 	// backward compatibility
 	if (realsize & 0xE000)
 		flags = 0;
@@ -994,11 +991,6 @@ Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
 			pins->myidbuf, pins->myp);
 	}
 
-	//pins->bptr = 0;
-	//while ((compare(pins->mystrbuf[pins->bptr],pins->myssample)!=-1)
-	//		&& (pins->bptr<pins->bufsize)) 
-	//	pins->bptr++;
-
 	pins->bptr = std::upper_bound(
 			pins->mystrbuf, pins->mystrbuf + pins->bufsize, pins->myssample, IsGreater) 
 		- pins->mystrbuf;
@@ -1321,7 +1313,7 @@ void correct(BYTE* s, int nSize)
 			}
 		}
 
-		// Remove noise
+		// Remove garbage
 		if (nOldSize == nSize)
 		{
 			for (i = 0; i < nSize && s[i+1] < 5; ++i)

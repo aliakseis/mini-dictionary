@@ -1,6 +1,4 @@
-#ifndef TEXTEXTRACTOR_H__
-#define TEXTEXTRACTOR_H__
-
+#pragma once
 
 enum { 
 	EXTRACT_TYPE_INTERNET_EXPLORER = 1,
@@ -18,7 +16,3 @@ bool ExtractText(
 		POINT pt,
 		char*& rpszWord, 
 		char*& rpszText);
-
-
-#endif// TEXTEXTRACTOR_H__
-

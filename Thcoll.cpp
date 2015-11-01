@@ -11,28 +11,13 @@ using std::nothrow;
 THCollection::THCollection(int aLimit) :
     count( 0 ),
     items( 0 ),
-    limit( 0 ),
-    shouldDelete( true )
+    limit( 0 )
 {
     setLimit( aLimit );
 }
 
-/*
-THCollection::THCollection() :
-    count( 0 ),
-    items( 0 ),
-    limit( 0 ),
-    delta( 0 ),
-    shouldDelete( true )
-{
-    items = 0;
-}
-*/
-
 THCollection::~THCollection()
 {
-//    if ( shouldDelete )
-//        freeAll();
 	count = 0;
     setLimit(0);
 }
