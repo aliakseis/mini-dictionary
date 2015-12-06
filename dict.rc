@@ -100,13 +100,13 @@ BEGIN
     ICON            "DICTIONARY",IDC_STATIC,4,5,20,20
 END
 
-SETTINGS DIALOGEX 0, 0, 159, 130
+SETTINGS DIALOGEX 0, 0, 159, 138
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,25,113,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,85,113,50,14
+    DEFPUSHBUTTON   "OK",IDOK,25,120,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,85,120,50,14
     EDITTEXT        IDC_NUM_ROWS,105,8,22,14,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,126,8,10,14
     LTEXT           "Number of rows (has effect after program restart)",IDC_STATIC,7,7,89,19
@@ -114,12 +114,15 @@ BEGIN
     CONTROL         "Capital Letters",IDC_CAPITAL_LETTERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,41,61,10
     CONTROL         "Soft Gray",IDC_SOFT_GRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,28,45,10
     CONTROL         "Minimize to Tray",IDC_MINIMIZE_TO_TRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,41,67,10
-    GROUPBOX        "Translation of a word under mouse cursor",IDC_STATIC,2,57,155,50,BS_FLAT
+    GROUPBOX        "Translation of a word under mouse cursor",IDC_STATIC,2,57,155,61,BS_FLAT
     CONTROL         "MSIE",IDC_TRANSLATION_IE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,68,33,10
     CONTROL         "Firefox",IDC_TRANSLATION_FIREFOX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,81,37,10
     CONTROL         "Acrobat",IDC_TRANSLATION_ACROBAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,68,41,10
     CONTROL         "MS Word",IDC_TRANSLATION_MS_WORD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,81,46,10
-    CONTROL         "Chrome",IDC_TRANSLATION_CHROME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,94,40,10
+    CONTROL         "Chrome - use --force-renderer-accessibility",IDC_TRANSLATION_CHROME,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,94,147,10
+    CONTROL         "<a href=""http://www.linuxfoundation.org/collaborate/workgroups/accessibility/iaccessible2comproxydll"">and install IAccessible2 COM proxy stub DLL</a>",IDC_IAccessible2,
+                    "SysLink",WS_TABSTOP,7,105,145,11
 END
 
 
@@ -174,7 +177,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 152
         TOPMARGIN, 7
-        BOTTOMMARGIN, 126
+        BOTTOMMARGIN, 134
     END
 END
 #endif    // APSTUDIO_INVOKED

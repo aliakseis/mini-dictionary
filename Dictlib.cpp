@@ -323,7 +323,7 @@ void mydict::memo2medi()
 {
 	int i,newsize;
 	if (dictmode!=memo)
-		exit(0);
+		exit(EXIT_FAILURE);
 
 	delete pins; 
 	pins = NULL;
@@ -357,14 +357,14 @@ void mydict::memo2medi()
 		if (count == 0) 
 			freeAll(); 
 		else 
-			exit(0);
+			exit(EXIT_FAILURE);
 }
 
 void mydict::medi2memo()
 {
 	int i;
 	if (dictmode!=medi) 
-		exit(0);
+		exit(EXIT_FAILURE);
 
 	delete pins; 
 	pins=NULL;
@@ -376,18 +376,18 @@ void mydict::medi2memo()
 		if (count==0) 
 			return;
 		else 
-			exit(0);
+			exit(EXIT_FAILURE);
 	_llseek(fhandle,myoffset,0);
 	for (i=0; i<count; i++) 
 	{
 		bucket_rec* p = (bucket_rec*)at(i);
 		if (p==NULL)
-			exit(0);
+			exit(EXIT_FAILURE);
 		int oldsize = p->get_idsize() + p->buf[0] + 6;
 		int newsize = oldsize + p->get_datasize();
 		void* pBuf = new(nothrow) BYTE[newsize];
 		if (!pBuf)
-			exit(0);
+			exit(EXIT_FAILURE);
 		memcpy(pBuf, p, oldsize);
 		DestructElement(p);
 		p = (bucket_rec*)pBuf;
@@ -531,7 +531,7 @@ int mydict::extractrec(mybuf psbuf, asubident pasidnt, int nr)
 		delete[] p;
 		break;
 	default: 
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	//ident array handling
 	for (int i = 0; i < extractres; i++)
@@ -595,7 +595,7 @@ void mydict::extractstr(mystring dest,int nr,int shift)
 			delete[] pp;
 			break;
 		default: 
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 }
 
@@ -765,7 +765,7 @@ void mydict::insertrec(mybuf psbuf,asubident pasidnt,int bsize,int nr)
 
 	bucket_rec* p=(bucket_rec*)new(nothrow) BYTE[bp + planessize + l + 6];
 	if (p==NULL)
-		exit(0);
+		exit(EXIT_FAILURE);
 
 	p->set(numplanes, bp, bsize);
 
@@ -788,7 +788,7 @@ void mydict::correctident(Ident oldidnt, Ident newidnt)
 	Ident col = oldidnt;
 	int row = firstThat(mysearch,&col);
 	if (row == -1)
-		exit(0);
+		exit(EXIT_FAILURE);
 
 	bucket_rec* p=(bucket_rec*)at(row);
 	if (!p->is_sequential())
@@ -816,7 +816,8 @@ void mydict::deletebyident(Ident ident)
 	WORD n0(0), n1(0);
 	int col=ident;
 	int myrow=firstThat(mysearch,&col);
-	if (myrow==-1)exit(0);
+	if (myrow==-1)
+        exit(EXIT_FAILURE);
 
 	mystring *b=new(nothrow) mybuf;
 	asubident idbuf;
@@ -856,7 +857,7 @@ void mydict::deletebyident(Ident ident)
 		if (n+n0 > 257) 
 			break;
 		if (n0 != extractrec(&b[n], &idbuf[n], myrow-1))
-			exit(0);
+			exit(EXIT_FAILURE);
 		n+=n0;
 		myrow--;
 		atFree(myrow);
@@ -867,7 +868,7 @@ void mydict::deletebyident(Ident ident)
 		memmove(&b[n1],b,n*sizeof(mystring));
 		memmove(&idbuf[n1],idbuf,n * sizeof(Ident));
 		if (n1 != extractrec(b, idbuf, myrow+1)) 
-			exit(0);
+			exit(EXIT_FAILURE);
 		n+=n1;
 		atFree(myrow+1);
 		break;
@@ -970,7 +971,7 @@ Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
 	if (pins == NULL) 
 		pins = new(nothrow) myinsertrec;
     if (pins == NULL)
-        exit(0);
+        exit(EXIT_FAILURE);
 	compfunc(pins->myssample,ss);
 	if (pins->myssample[0] == 0) 
 		return EMPTY_STRING;

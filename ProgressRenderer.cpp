@@ -74,7 +74,7 @@ public:
             ULARGE_INTEGER* plibNewPosition)
 	{
 
-        unsigned int newIndex = dlibMove.QuadPart;
+        unsigned int newIndex = (unsigned int) dlibMove.QuadPart;
         switch (dwOrigin)
         {
         case STREAM_SEEK_SET: break;

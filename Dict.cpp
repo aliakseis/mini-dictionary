@@ -510,7 +510,7 @@ BOOL WriteProfileInt(const char* lpAppName,  // section name
 }
 
 
-INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM)
+INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {  
 	char szBuf[18];
 	switch (iMessage)
@@ -587,7 +587,21 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			return(FALSE);
 		}
 		break;
-	default:
+    case WM_NOTIFY:
+        {
+            LPNMHDR pnmh = (LPNMHDR)lParam;
+            // If the notification came from the syslink control
+            if (pnmh->idFrom == IDC_IAccessible2) {
+                // NM_CLICK is the notification is normally used.
+                // NM_RETURN is the notification needed for return keypress, otherwise the control is not keyboard accessible.
+                if ((pnmh->code == NM_CLICK) || (pnmh->code == NM_RETURN)) {
+                    // Recast lParam to an NMLINK item because it also contains NMHDR as part of its structure
+                    PNMLINK link = (PNMLINK)lParam;
+                    ShellExecuteW(NULL, L"open", link->item.szUrl, NULL, NULL, SW_SHOWNORMAL);
+                }
+            }
+        }
+    default:
 		return(FALSE);
 	}
 	return(TRUE);
@@ -704,7 +718,7 @@ public:
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_DELETE, delitems)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_COMPRESS, compress)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_IMPORT, import)
-	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_EXPORT, export)
+	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_EXPORT, doExport)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_INSERT, insert)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_SEARCH, OnSearch)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_SETTINGS, OnSettings)
@@ -1068,7 +1082,7 @@ public:
 	void tag();
 	void compress();
 	void import();
-	void export();
+    void doExport();
 
 	void ResetPage() 
 	{
@@ -1210,7 +1224,7 @@ void MainWindow::rollback(mydict *pdict, int size)
 	if(m_wcoll.load()) 
 	{
 		if(m_wcoll.getcount()!=size) 
-			exit(0);
+			exit(EXIT_FAILURE);
 		for(i=0; i<size; i++) 
 		{
 			Ident j = m_wcoll.at(i);
@@ -1646,7 +1660,7 @@ void MainWindow::delitems()
 	EnableMenuItem(m_popup, IDM_DELETE, MF_GRAYED);
 	m_pleftd->memo2medi();
 	if (m_ident != m_prightd->medi_load()) 
-		exit(0);
+		exit(EXIT_FAILURE);
 	SetCursor(hCursorOld);
 	m_bufptr = 0;
 	putfirst("");
@@ -1785,7 +1799,7 @@ void MainWindow::insert()
 	delete pl;
 	m_pleftd->memo2medi();
 	if (m_prightd->medi_load() != m_ident) 
-		exit(0);
+		exit(EXIT_FAILURE);
 	SetCursor(hCursorOld);
 	putfirst("");
 }
@@ -1942,7 +1956,7 @@ void MainWindow::import()
 
 	m_ident = m_pleftd->memo_load();
 	if (m_ident != m_prightd->memo_load())
-		exit(0);
+		exit(EXIT_FAILURE);
 
 	BOOL saveUseHook = g_bUseHook;
 	g_bUseHook = false;
@@ -2037,7 +2051,7 @@ void MainWindow::import()
 	putfirst("");
 }
 
-void MainWindow::export()
+void MainWindow::doExport()
 {
 	char szFile [_MAX_PATH];
 	szFile[0] = 0;

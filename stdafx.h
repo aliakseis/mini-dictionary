@@ -91,3 +91,4 @@ extern CComModule _Module;
 #define OBJID_NATIVEOM      ((LONG)0xFFFFFFF0)
 #endif
 
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
