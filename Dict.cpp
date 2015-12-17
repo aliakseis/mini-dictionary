@@ -2130,9 +2130,9 @@ BOOL MainWindow::SearchDlg()
 	return bSearch;
 }
 
-const char szContentsSel[] = "|Contents|";
+const char szContentsSel[] = "/Contents\\";
 const char szContents[] = "Contents";
-const char szSearchSel[] = "|Search|";
+const char szSearchSel[] = "/Search\\";
 const char szSearch[] = "Search";
 
 void MainWindow::SetFilterMode(bool filter)
