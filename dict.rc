@@ -114,7 +114,7 @@ BEGIN
     CONTROL         "Capital Letters",IDC_CAPITAL_LETTERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,41,61,10
     CONTROL         "Soft Gray",IDC_SOFT_GRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,28,45,10
     CONTROL         "Minimize to Tray",IDC_MINIMIZE_TO_TRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,41,67,10
-    GROUPBOX        "Translation of a word under mouse cursor",IDC_STATIC,2,57,155,61,BS_FLAT
+    GROUPBOX        "Translation of a word under mouse cursor",IDC_STATIC,2,57,155,59,BS_FLAT
     CONTROL         "MSIE",IDC_TRANSLATION_IE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,68,33,10
     CONTROL         "Firefox",IDC_TRANSLATION_FIREFOX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,81,37,10
     CONTROL         "Acrobat",IDC_TRANSLATION_ACROBAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,68,41,10
@@ -122,7 +122,7 @@ BEGIN
     CONTROL         "Chrome - use --force-renderer-accessibility",IDC_TRANSLATION_CHROME,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,94,147,10
     CONTROL         "<a href=""http://www.linuxfoundation.org/collaborate/workgroups/accessibility/iaccessible2comproxydll"">and install IAccessible2 COM proxy stub DLL</a>",IDC_IAccessible2,
-                    "SysLink",WS_TABSTOP,7,105,145,11
+                    "SysLink",WS_TABSTOP,7,103,145,11
 END
 
 
