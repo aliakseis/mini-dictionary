@@ -267,16 +267,18 @@ class mycollection: public THSortedCollection
 			 atPut(i, p);
 		}
  protected:
-	  dictmodetype dictmode;
 		void DestructElement(void* item) { delete[] (BYTE*)item; }
 	  virtual void* keyOf(void FAR* item)
 	  { return &((bucket_rec*) item)->buf; }
 	  virtual int compare(void* key1,void* key2);
 };
 
-class mydict:public mycollection
+class mydict : private mycollection
 {
  public:
+     using mycollection::getCount;
+     using mycollection::at;
+
 	mydict(const char* pth);
 	mydict() : mycollection(512) 
 	{
@@ -340,6 +342,8 @@ class mydict:public mycollection
 	}
 
  protected:
+     dictmodetype dictmode;
+
 	char dictpath[_MAX_PATH];
 	int curp;
 	int startshift;
