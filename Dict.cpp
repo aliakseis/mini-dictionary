@@ -262,7 +262,7 @@ LRESULT CALLBACK MsgHookProc(int code,WPARAM wParam,LPARAM lParam)
 	    && ((LPMSG)lParam)->message==WM_KEYDOWN) 
 	{
 		WPARAM wMsgParam=((LPMSG)lParam)->wParam;
-		BOOL bChange=TRUE;
+		bool bChange = true;
 		if(wMsgParam>0x40 && wMsgParam<0x5B)
 			wMsgParam=xlat[wMsgParam-0x41];
 		else switch(wMsgParam) 
@@ -289,15 +289,23 @@ LRESULT CALLBACK MsgHookProc(int code,WPARAM wParam,LPARAM lParam)
 			wMsgParam=(GetKeyState(VK_SHIFT) & 0x8000)? ',': '.';
 			break;
 		default:       
-			bChange= FALSE;
+			bChange = false;
 		}
 		if(bChange) 
 		{
 			if(wMsgParam > 0x40 
 			    && !(GetKeyState(VK_CAPITAL) & 1 ^ (WORD)GetKeyState(VK_SHIFT) >> 15))
 				wMsgParam+= 0x20;
-			SendMessage(((LPMSG)lParam)->hwnd, WM_CHAR, wMsgParam, 
-				((LPMSG)lParam)->lParam);
+            if (IsWindowUnicode(((LPMSG)lParam)->hwnd))
+            {
+                SendMessageW(((LPMSG)lParam)->hwnd, WM_CHAR, wMsgParam + 0x350,
+                    ((LPMSG)lParam)->lParam);
+            }
+            else
+            {
+                SendMessageA(((LPMSG)lParam)->hwnd, WM_CHAR, wMsgParam,
+                    ((LPMSG)lParam)->lParam);
+            }
 			return 1;
 		}
 	}
