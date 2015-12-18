@@ -611,8 +611,7 @@ bool MozillaFirefoxTextExtractor::ExtractText(
 	{
 		int i = (l + h) >> 1;
 
-		int x, y, width, height;
-		x = y = width = height = 0;
+        int x(0), y(0), width(0), height(0);
 		while ( i >= l 
 			&& (spSimpleDOMText->get_unclippedSubstringBounds(i, i + 1, 
 											  &x,
@@ -622,7 +621,10 @@ bool MozillaFirefoxTextExtractor::ExtractText(
 				, 0 == x && 0 == y && 0 == width && 0 == height))
 			--i;
 
-		if ( i < l || (pt.y >= y + height || pt.y >= y && pt.x >= x) )
+        if (l == length - 1 && (pt.y > y + height || pt.y >= y && pt.x > x + width))
+            return false;
+
+        if (i < l || (pt.y >= y + height || pt.y >= y && pt.x >= x))
 			l = ((l + h) >> 1) + 1;
 		else
 			h = i - 1;
@@ -676,16 +678,18 @@ bool ChromeTextExtractor::ExtractText(
     {
         int i = (l + h) >> 1;
 
-        LONG x, y, width, height;
-        x = y = width = height = 0;
+        LONG x(0), y(0), width(0), height(0);
         while (i >= l
-            && (spAccessibleText->get_characterExtents(i, IA2_COORDTYPE_SCREEN_RELATIVE,
-            &x,
-            &y,
-            &width,
-            &height)
-            , 0 == x && 0 == y && 0 == width && 0 == height))
+                && (spAccessibleText->get_characterExtents(i, IA2_COORDTYPE_SCREEN_RELATIVE,
+                    &x,
+                    &y,
+                    &width,
+                    &height)
+                , 0 == x && 0 == y && 0 == width && 0 == height))
             --i;
+
+        if (l == length - 1 && (pt.y > y + height || pt.y >= y && pt.x > x + width))
+            return false;
 
         if (i < l || (pt.y >= y + height || pt.y >= y && pt.x >= x))
             l = ((l + h) >> 1) + 1;
