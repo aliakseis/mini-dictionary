@@ -1219,13 +1219,12 @@ MainWindow::MainWindow()
 
 void MainWindow::rollback(mydict *pdict, int size)
 {
-	int i;
 	pdict->medi2memo();
 	if(m_wcoll.load()) 
 	{
 		if(m_wcoll.getcount()!=size) 
 			exit(EXIT_FAILURE);
-		for(i=0; i<size; i++) 
+		for(int i = 0; i < size; ++i) 
 		{
 			Ident j = m_wcoll.at(i);
 			pdict->deletebyident(j);
@@ -1235,7 +1234,7 @@ void MainWindow::rollback(mydict *pdict, int size)
 		m_wcoll.erase();
 	}
 	else 
-		for(i=0;i<size;i++) 
+		for(int i = 0; i < size; ++i) 
 			pdict->deletebyident(--m_ident);
 	pdict->store();
 	pdict->memo2medi();
@@ -1263,7 +1262,6 @@ bool MainWindow::FixReorderedIds(mydict* pleftd, mydict* prightd)
 
 LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 {
-	int i;
 	PAINTSTRUCT ps;
 	SIZE size = {0};
 	BeginPaint( &ps );
@@ -1284,7 +1282,7 @@ LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 		    rect2.right = rect.right - 1;
 
 		    HBRUSH hbr = CreateSolidBrush(0x00EEEEEE);
-		    for (i = 1; i < m_NumRows; i += 2)
+		    for (int i = 1; i < m_NumRows; i += 2)
 		    {
 			    rect2.top = i*INTERLIN+3;
 			    rect2.bottom = i*INTERLIN+17;
@@ -1298,7 +1296,7 @@ LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 	    HFONT hFontold = (HFONT)SelectObject(ps.hdc, g_hFont);
 	    SetBkMode(ps.hdc, TRANSPARENT);
 	    int len;
-	    for (i=0; i<m_bufptr; i++) 
+	    for (int i = 0; i < m_bufptr; ++i) 
 	    {
 		    if ((i!=0) && (strcmp(m_st_left[i-1], m_st_left[i])==0)) 
 		    {
@@ -1317,7 +1315,7 @@ LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 	    }
 	    DeleteObject(SelectObject(ps.hdc,hOldpen));
 	    int iOldROP = SetROP2(ps.hdc, R2_NOTXORPEN);
-	    for(i=0; i<m_bufptr; i++)
+	    for(int i = 0; i < m_bufptr; ++i)
 		    if (m_wcoll.search(m_id[i],FALSE)) 
 		    {
 			    MoveToEx(ps.hdc, 3, i*INTERLIN+18, NULL);
@@ -1621,7 +1619,6 @@ const char szWarning2[] = " record(s).\nDo you want to proceed?";
 
 void MainWindow::delitems()
 {
-	int i;
 	if(m_wcoll.getcount()==0) 
 		return;
 
@@ -1637,7 +1634,7 @@ void MainWindow::delitems()
 
 	m_pleftd->free();
 	m_prightd->medi2memo();
-	for (i=0; i < m_wcoll.getcount(); i++) 
+	for (int i = 0; i < m_wcoll.getcount(); ++i) 
 	{
 		int j = m_wcoll.at(i);
 		m_prightd->deletebyident(j);
@@ -1648,7 +1645,7 @@ void MainWindow::delitems()
 	m_prightd->store();
 	m_prightd->free();
 	m_ident = m_pleftd->memo_load();
-	for (i=0; i < m_wcoll.getcount(); i++) 
+	for (int i = 0; i < m_wcoll.getcount(); ++i) 
 	{
 		int j = m_wcoll.at(i);
 		m_pleftd->deletebyident(j);
@@ -1735,7 +1732,6 @@ bool present(mydict *p1, mydict *p2, const char *s1, const char *s2)
 
 void MainWindow::insert()
 {
-	unsigned int i;
 	search_buf buf;
 	m_wcoll.free();
 	EnableMenuItem(m_popup, IDM_DELETE, MF_GRAYED);
@@ -1779,7 +1775,7 @@ void MainWindow::insert()
 	HCURSOR hCursorOld = SetCursor(LoadCursor(NULL, IDC_WAIT));
 	m_pleftd->free();
 	m_prightd->medi2memo();
-	for (i=0;i<locident;i++) 
+    for (unsigned int i = 0; i < locident; ++i)
 	{
 		pr->findbyident(buf, i);
 		m_prightd->insertstr(buf, m_ident);
@@ -1789,7 +1785,7 @@ void MainWindow::insert()
 	m_prightd->free();
 	delete pr;
 	m_ident = m_pleftd->memo_load();
-	for (i=0;i<locident;i++) 
+    for (unsigned int i = 0; i < locident; ++i)
 	{
 		pl->findbyident(buf, i);
 		m_pleftd->insertstr(buf, m_ident);

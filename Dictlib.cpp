@@ -148,14 +148,12 @@ void mydict::free()
 
 Ident mydict::memo_load()
 {
-	int f;
 	Ident wb = 0;
-	int i;
 	myprefix pref;
 	int realsize = 0;
 
 	dictmode = memo;
-	f=_lopen(dictpath,OF_READ|OF_SHARE_EXCLUSIVE);
+	int f=_lopen(dictpath,OF_READ|OF_SHARE_EXCLUSIVE);
 	if (f==-1) return 0;
 	_llseek(f, 2, 0);
 	_lread(f, (LPSTR)&flags, 2);
@@ -166,7 +164,7 @@ Ident mydict::memo_load()
 		flags = 0;
 	realsize &= ~0xE000;
 
-	for (i=0;i<realsize;i++) 
+    for (int i = 0; i < realsize; ++i)
 	{
 		_lread(f,(LPSTR)&pref,sizeof(pref));
 		int recsize = pref.get_idsize() + pref.b0;
@@ -181,7 +179,7 @@ Ident mydict::memo_load()
 		wb += p->get_idnr();
 	}
 	myoffset=_llseek(f,0,1);
-	for (i=0;i<realsize;i++) 
+	for (int i = 0; i < realsize; ++i) 
 	{
 		bucket_rec* p=(bucket_rec*)at(i);
 		if (p==NULL)
@@ -198,7 +196,6 @@ Ident mydict::memo_load()
 Ident mydict::medi_load()
 {
 	Ident wb = 0;
-	int i, recsize, realsize = 0;
 	myprefix pref;
 	dictmode=medi;
 	delete[] offsets; offsets = NULL;
@@ -212,6 +209,7 @@ Ident mydict::medi_load()
 	}
 	_llseek(fhandle, 2, 0);
 	_lread(fhandle, (LPSTR)&flags, 2);
+    int realsize = 0;
 	_lread(fhandle, (LPSTR)&realsize, 2);
 
 	// backward compatibility
@@ -222,10 +220,10 @@ Ident mydict::medi_load()
 	long offs = 0;
 	if (realsize > 0)
 			offsets = new(nothrow) long[realsize];
-	for (i=0; i < realsize; i++) 
+	for (int i = 0; i < realsize; ++i) 
 	{
 		_lread(fhandle, (LPSTR)&pref, sizeof(pref));
-		recsize = pref.get_idsize() + pref.b0;
+		int recsize = pref.get_idsize() + pref.b0;
 		bucket_rec* p = (bucket_rec*) new(nothrow) BYTE[recsize+6];
 		if (p==NULL)
 			return 0;
@@ -252,7 +250,6 @@ Ident mydict::medi_load()
 
 bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 {
-	int i,size;
 	bucket_rec* p;
 	long l2;
 	UINT result = 0;
@@ -265,7 +262,7 @@ bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 	_lwrite(f, (LPSTR)&count, 2);
 	l2=6;
 	Ident idx = 0;
-	for (i=0;i<count;i++) 
+	for (int i = 0; i < count; ++i) 
 	{
 		p = (bucket_rec*) at(i);
 		if (p==NULL)
@@ -273,7 +270,7 @@ bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 
 		BYTE buf[6 + 256 + sizeof(Ident)];
 
-		size = p->get_idsize() + p->buf[0] + 6;
+		int size = p->get_idsize() + p->buf[0] + 6;
 		l2+=size;
 
 		if (bSequentialIds)
@@ -296,7 +293,7 @@ bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 		}
 	}
 	myoffset=l2;
-	for (i=0;i<count;i++) 
+	for (int i = 0; i < count; ++i) 
 	{
 		p=(bucket_rec*)at(i);
 		if (p==NULL)return FALSE;
@@ -321,7 +318,6 @@ bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 
 void mydict::memo2medi()
 {
-	int i,newsize;
 	if (dictmode!=memo)
 		exit(EXIT_FAILURE);
 
@@ -333,7 +329,7 @@ void mydict::memo2medi()
 	long offs = 0;
 	if (count > 0)
 			offsets = new(nothrow) long[count];
-	for (i = 0; i < count; i++) 
+	for (int i = 0; i < count; ++i) 
 	{
 		bucket_rec* p = (bucket_rec*)at(i);
 		if (p==NULL)
@@ -342,7 +338,7 @@ void mydict::memo2medi()
 		offsets[i] = offs;
 		offs += p->get_datasize();
 
-		newsize = p->get_idsize() + p->buf[0] + 6;
+		int newsize = p->get_idsize() + p->buf[0] + 6;
 		void* pBuf = new(nothrow) BYTE[newsize];
 		if (pBuf)
 		{
@@ -362,7 +358,6 @@ void mydict::memo2medi()
 
 void mydict::medi2memo()
 {
-	int i;
 	if (dictmode!=medi) 
 		exit(EXIT_FAILURE);
 
@@ -378,7 +373,7 @@ void mydict::medi2memo()
 		else 
 			exit(EXIT_FAILURE);
 	_llseek(fhandle,myoffset,0);
-	for (i=0; i<count; i++) 
+	for (int i = 0; i < count; ++i) 
 	{
 		bucket_rec* p = (bucket_rec*)at(i);
 		if (p==NULL)
@@ -709,8 +704,7 @@ void mydict::insertrec(mybuf psbuf,asubident pasidnt,int bsize,int nr)
 	WORD cnt=0; 
 	int lastprm = 0;
 	int lastlen = 0;
-	int i;
-	for (i=1;i<bsize;i++) 
+	for (int i = 1; i < bsize; ++i) 
 	{
 		int prm = 1;
 		WORD max = psbuf[i-1][0];
@@ -756,7 +750,7 @@ void mydict::insertrec(mybuf psbuf,asubident pasidnt,int bsize,int nr)
 	WORD l=psbuf[0][0];
 
 	Ident mask = 0;
-	for (i = 0; i < bsize; i++)
+	for (int i = 0; i < bsize; ++i)
 		mask |= pasidnt[i];
 
 	int numplanes = GetNumPlanes(mask);
@@ -771,7 +765,7 @@ void mydict::insertrec(mybuf psbuf,asubident pasidnt,int bsize,int nr)
 
 	memcpy(p->buf,psbuf,l+1);
 	//ident array handling
-	for (i = 0; i < bsize; i++)
+	for (int i = 0; i < bsize; ++i)
 		p->set_id(i, *(pasidnt++));
 
 	memcpy(&p->buf[l + planessize + 1], buf, bp);
@@ -1390,7 +1384,6 @@ void mydict::compress(Ident* pSubstIds /*= NULL*/)
 {
 	long* freqs = new(nothrow) long[numSymbols * numSymbols];
 	memset(freqs, 0, numSymbols * numSymbols * sizeof(long));
-	int i;
 	mystring *b = new(nothrow) mybuf;
 	asubident idbuf;
 	bool bOldVersion = false;
@@ -1422,10 +1415,9 @@ void mydict::compress(Ident* pSubstIds /*= NULL*/)
 	memset(newCumFreqs, 1, numSymbols * numSymbols * sizeof(BYTE));
 	TreeHelper* helpers = new(nothrow) TreeHelper[numSymbols];
 
-	for (i = 0; i < numSymbols; ++i)
+	for (int i = 0; i < numSymbols; ++i)
 	{
-		int j;
-		for(j = 0; j < numSymbols; ++j)
+		for(int j = 0; j < numSymbols; ++j)
 		{
 			helpers[j].freq = freqs[i * numSymbols + j];
 			helpers[j].begin = j;
@@ -1437,7 +1429,7 @@ void mydict::compress(Ident* pSubstIds /*= NULL*/)
 		{
 			long minFreq = 0x7FFFFFFF;
 			int cur = 0, diff = 0;
-			for(j = count-1; j--; )
+			for(int j = count - 1; --j; )
 			{
 				long freq = helpers[j].freq + helpers[j+1].freq;
 				if (freq < minFreq 
@@ -1450,7 +1442,7 @@ void mydict::compress(Ident* pSubstIds /*= NULL*/)
 			}
 			helpers[cur].end = helpers[cur+1].end;
 			helpers[cur].freq += helpers[cur+1].freq;
-			for(j = helpers[cur].begin; j < helpers[cur].end; ++j)
+			for(int j = helpers[cur].begin; j < helpers[cur].end; ++j)
 				++curFreqs[j];
 			memmove(helpers + cur + 1, helpers + cur + 2
 				, (count - cur - 2) * sizeof(TreeHelper));
@@ -1514,8 +1506,7 @@ bool mydict::MakeHash(const char* s, hash_buf& pHash)
 	BYTE sb[256];
 	sb[1] = (BYTE) min(strlenx(s), 254);
 	sb[0] = sb[1] + 1;
-	int i;
-	for (i=2; i<=sb[0]; i++) 
+	for (int i = 2; i <= sb[0]; ++i) 
 		sb[i] = lookupChars[(BYTE) s[i - 2]];
 
 	BYTE sb1[MYSTRING_SIZE + 3] = {0};
@@ -1525,7 +1516,7 @@ bool mydict::MakeHash(const char* s, hash_buf& pHash)
 	BYTE b = sb1[(nBits >> 3) + 1];
 	pHash[b] = true;
 
-	for (i = 0; i < numSymbols; ++i)
+	for (int i = 0; i < numSymbols; ++i)
 	{
 		sb[1] = i;
 		BYTE sb1[MYSTRING_SIZE + 3] = {0};
