@@ -182,8 +182,10 @@ struct set_helper
 
 struct bucket_rec : public recbase 
 {
-
-	tbuf buf;
+    union {
+        tbuf buf;
+        mystring ms;
+    };
 
 	Ident get_id(int idx)
 	{
@@ -298,7 +300,7 @@ class mydict : private mycollection
 	bool store(unsigned short flags_ = 0, bool bSequentialIds = false);
 	void memo2medi();
 	void medi2memo();
-	virtual void expfunc(char *dest,mystring s);
+	virtual void expfunc(char *dest,mystring& s);
 	void findbyident(char *dest, Ident ident);
 	void insertstr(char *ss, Ident ident);
 	void deletebyident(Ident ident);
@@ -327,7 +329,7 @@ class mydict : private mycollection
 		assert(idx <= 258);
 		return diffs[idx];
 	}
-	bool MakeHash(const char* str, hash_buf pHash);
+	bool MakeHash(const char* str, hash_buf& pHash);
 	long GetDataSize();
 
 	int getMatchingCount(const char *s);
@@ -377,9 +379,9 @@ class mydict : private mycollection
 	}
 	int subextract(BYTE* buf,mybuf psbuf,int mysize, int nVersion);
 	int extractrec(mybuf psbuf, asubident pasidnt, int nr);
-	void extractstr(mystring dest,int nr,int shift);
+	void extractstr(mystring& dest,int nr,int shift);
 
-	void compfunc(mystring dest, const char *s);
+	void compfunc(mystring& dest, const char *s);
 
 	void insertrec(mybuf psbuf,asubident pasidnt, int bsize, int nr);
 
@@ -397,7 +399,7 @@ class myengdict:public mydict
 		bAutoDeleteCumFreqs = false;
 		cumFreqs = other->cumFreqs;
 	}
-	virtual void expfunc(char *dest,mystring s);
+	virtual void expfunc(char *dest, mystring& s);
 
 	virtual Ident first_similar(char *ss, char *substring);
 	
@@ -421,7 +423,7 @@ class myrusdict:public mydict
 		bAutoDeleteCumFreqs = false;
 		cumFreqs = other->cumFreqs;
 	}
-	virtual void expfunc(char *dest,mystring s);
+	virtual void expfunc(char *dest, mystring& s);
 	virtual mydict *newsimilar() { return new(nothrow) myrusdict(this); }
 	virtual bool IsCyrillic() { return TRUE; }
 

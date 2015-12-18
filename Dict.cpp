@@ -1340,7 +1340,7 @@ LRESULT MainWindow::OnPaint( UINT, WPARAM, LPARAM, BOOL& )
 	return 0;
 }
 
-inline bool HashAccept(const BYTE* pHashTable, mystring buf)
+inline bool HashAccept(const BYTE* pHashTable, mystring& buf)
 {
 	for (BYTE* p = buf + buf[0]; p != buf; --p)
 	{

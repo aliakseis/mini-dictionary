@@ -108,7 +108,7 @@ inline int EncodeDifference(unsigned int nPrevLen, unsigned int nLength, unsigne
 	return nResult;
 }
 
-inline bool IsGreater(const mystring left, const mystring right)
+inline bool IsGreater(const mystring& left, const mystring& right)
 {
 	return CompareStrings(left, right) > 0;
 }
@@ -540,7 +540,7 @@ int mydict::extractrec(mybuf psbuf, asubident pasidnt, int nr)
 }
 
 
-void subextractstr(mystring mybuf,BYTE* buf, int shift, int nVersion)
+void subextractstr(mystring& mybuf,BYTE* buf, int shift, int nVersion)
 {
 	int bs=0;
 	while (bs<shift)
@@ -570,7 +570,7 @@ void subextractstr(mystring mybuf,BYTE* buf, int shift, int nVersion)
 		}
 }
 
-void mydict::extractstr(mystring dest,int nr,int shift)
+void mydict::extractstr(mystring& dest, int nr, int shift)
 {
 	int subsize;
 	BYTE *pp;
@@ -599,7 +599,7 @@ void mydict::extractstr(mystring dest,int nr,int shift)
 		}
 }
 
-void mydict::expfunc(char *dest,mystring s)
+void mydict::expfunc(char *dest, mystring& s)
 {
 	BYTE b = s[0];
 	memmove(dest, &s[1], b);
@@ -1008,13 +1008,20 @@ Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
 	{
 		if (substring != NULL)
 		{
-			BYTE* prev;
-			if (pins->bptr < pins->bufsize)
-				prev = pins->mystrbuf[pins->bptr];
-			else if (pins->myp > 0)
-				prev = ((bucket_rec*) at(pins->myp - 1))->buf;
-			else
-				return END_OF_DATA;
+            //mystring prev;
+			//if (pins->bptr < pins->bufsize)
+			//	prev = pins->mystrbuf[pins->bptr];
+			//else if (pins->myp > 0)
+			//	prev = ((bucket_rec*) at(pins->myp - 1))->buf;
+			//else
+			//	return END_OF_DATA;
+
+            if (pins->bptr >= pins->bufsize && pins->myp <= 0)
+                return END_OF_DATA;
+
+            mystring& prev = *((pins->bptr < pins->bufsize) 
+                ? pins->mystrbuf + pins->bptr
+                : &((bucket_rec*)at(pins->myp - 1))->ms);
 
 			if (prev[0] <= pins->myssample[0])
 			{
@@ -1331,7 +1338,7 @@ void correct(BYTE* s, int nSize)
 	s[0] = min(nSize, 254);
 }
 
-void mydict::compfunc(mystring dest, const char *s)
+void mydict::compfunc(mystring& dest, const char *s)
 {
 	if (lookupChars)
 	{
@@ -1497,7 +1504,7 @@ void mydict::ReadCumFreqs(int f)
 		delete[] newCumFreqs;
 }
 
-bool mydict::MakeHash(const char* s, hash_buf pHash)
+bool mydict::MakeHash(const char* s, hash_buf& pHash)
 {
 	if (!lookupChars || !cumFreqs)
 		return false;
@@ -1681,7 +1688,7 @@ void myengdict::CommonConstruct()
 #endif //COMPATIBLE
 }
 
-void myengdict::expfunc(char *dest,mystring s)
+void myengdict::expfunc(char *dest, mystring& s)
 {
 	BYTE sb[BUFFER_SIZE];
 	if (cumFreqs)
@@ -1842,7 +1849,7 @@ void myrusdict::CommonConstruct()
 #endif //COMPATIBLE
 }
 
-void myrusdict::expfunc(char *dest,mystring s)
+void myrusdict::expfunc(char *dest, mystring& s)
 {
 	BYTE sb[BUFFER_SIZE];
 	if (cumFreqs)
