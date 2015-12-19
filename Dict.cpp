@@ -2163,7 +2163,7 @@ static volatile HWND g_hwndToolTip;
 
 class CSelfDestroyingToolTip: public CWindowImpl< CSelfDestroyingToolTip >
 {
-	enum { IDEVT_TIMEOUT = 1 };
+	enum { IDEVT_TIMEOUT = 1234 };
 
    BEGIN_MSG_MAP( CSelfDestroyingToolTip )
       MESSAGE_HANDLER( WM_NCHITTEST, OnNcMouse )
@@ -2196,11 +2196,18 @@ private:
 		delete this;
    }
 
-	LRESULT OnTimer( UINT, WPARAM, LPARAM, BOOL& )
+   LRESULT OnTimer(UINT, WPARAM wParam, LPARAM, BOOL& bHandled)
 	{
-		PostMessage(WM_CLOSE);
-		return 0;
-	}
+        if (wParam == IDEVT_TIMEOUT)
+        {
+            PostMessage(WM_CLOSE);
+        }
+        else
+        {
+            bHandled = FALSE;
+        }
+        return 0;
+   }
 };
 
 const char g_arrVKMouseButtons[] = { VK_LBUTTON, VK_RBUTTON, VK_MBUTTON };
@@ -2319,8 +2326,10 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 		g_hwndToolTip = CreateWindow(TOOLTIPS_CLASS,
 				NULL,
 				WS_POPUP | TTS_NOPREFIX | TTS_BALLOON | TTS_ALWAYSTIP,
-				0, 0, 0, 0,
-				NULL, NULL,
+                CW_USEDEFAULT, CW_USEDEFAULT,
+                CW_USEDEFAULT, CW_USEDEFAULT,
+                NULL, 
+                NULL,
 				g_hInstance,
 				NULL);
 		if (g_hwndToolTip)
