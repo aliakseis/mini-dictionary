@@ -484,6 +484,45 @@ bool InternetExplorerTextExtractor::ExtractText(
 			|| !spElement)
 		return false;
 
+    /*
+    CComPtr<IAccessible> pacc;
+    LRESULT lRes = 0;
+
+    // Send WM_GETOBJECT to document window
+    if (!SendMessageTimeout(hWnd, WM_GETOBJECT, 0L, OBJID_CLIENT,
+                            SMTO_ABORTIFHUNG, 500, (PDWORD_PTR)&lRes)
+            || 0 == lRes)
+        return 0;
+
+    if (FAILED(g_pfObjectFromLresult(lRes, __uuidof(IAccessible), 0, (void**)&pacc)))
+        return 0;
+
+    CComQIPtr<IServiceProvider> spServiceProvider(pacc);
+    CComPtr<IHTMLWindow2> spWindow;
+    if (FAILED(spServiceProvider->QueryService(__uuidof(IHTMLWindow2), __uuidof(IHTMLWindow2),
+                (void **)&spWindow))
+            || !spWindow)
+    return false; 
+
+    CComQIPtr<IHTMLWindow3_> spContentWindow3(spWindow);
+    if (spContentWindow3 == NULL)
+        return 0;
+
+    long left = 0, top = 0;
+    spContentWindow3->get_screenLeft(&left);
+    spContentWindow3->get_screenTop(&top);
+    pt.x -= left;
+    pt.y -= top;
+
+    CComPtr<IHTMLDocument2> spDoc;
+    if (FAILED(spWindow->get_document(&spDoc)))
+        return false;
+
+    CComDispatchDriver spElement;
+    if (FAILED(spDoc->elementFromPoint(pt.x, pt.y, (IHTMLElement**)&spElement)))
+        return false;
+    */
+
 	CComVariant isTextEdit;
 
     if (SUCCEEDED(spElement.GetPropertyByName(L"isTextEdit", &isTextEdit)) && !isTextEdit.boolVal)
