@@ -369,9 +369,8 @@ void IeZoomRecalculate(IAccessible* pacc, POINT& pt)
 	}
 }
 
-CComPtr<IServiceProvider> GetServiceProvider(HWND hWnd, POINT& pt, bool isIE = false)
+CComPtr<IAccessible> GetAccessible(HWND hWnd, POINT& pt, bool isIE = false)
 {
-	CComVariant vtChild;
 	CComPtr<IAccessible> pacc;
 	LRESULT lRes = 0;
 
@@ -389,7 +388,8 @@ CComPtr<IServiceProvider> GetServiceProvider(HWND hWnd, POINT& pt, bool isIE = f
 	if (isIE)
 		IeZoomRecalculate(pacc, pt);
 
-	CComQIPtr<IAccessible> paccChild;
+    CComVariant vtChild;
+    CComQIPtr<IAccessible> paccChild;
 	for (; SUCCEEDED(pacc->accHitTest(ptScreen.x, ptScreen.y, &vtChild))
 				 && VT_DISPATCH == vtChild.vt && (paccChild = vtChild.pdispVal) != NULL; 
 			vtChild.Clear() )
@@ -397,9 +397,13 @@ CComPtr<IServiceProvider> GetServiceProvider(HWND hWnd, POINT& pt, bool isIE = f
 		pacc.Attach(paccChild.Detach());
 	}
 
-	return CComQIPtr<IServiceProvider>(pacc);
+	return pacc;
 }
 
+CComPtr<IServiceProvider> GetServiceProvider(HWND hWnd, POINT& pt, bool isIE = false)
+{
+    return CComQIPtr<IServiceProvider>(GetAccessible(hWnd, pt, isIE));
+}
 
 class ITextExtractor
 {
@@ -443,6 +447,10 @@ public:
 	virtual bool ExtractText(HWND hWnd,
 		POINT pt,
 		char*& rpszWord, char*& rpszText);
+
+    bool DoExtractText(IAccessible* pAccessible,
+        POINT pt,
+        char*& rpszWord, char*& rpszText);
 };
 
 
@@ -692,11 +700,43 @@ bool MozillaFirefoxTextExtractor::ExtractText(
 
 
 bool ChromeTextExtractor::ExtractText(
-		HWND hWnd, 
-		POINT pt,
-		char*& rpszWord, char*& rpszText)
+        HWND hWnd,
+        POINT pt,
+        char*& rpszWord, char*& rpszText)
 {
-	CComPtr<IServiceProvider> pServiceProvider(GetServiceProvider(hWnd, pt));
+    CComPtr<IAccessible> pAccessible(GetAccessible(hWnd, pt));
+    if (!pAccessible)
+        return false;
+
+    if (DoExtractText(pAccessible, pt, rpszWord, rpszText))
+        return true;
+
+    CComPtr<IDispatch> spDisp;
+    pAccessible->get_accParent(&spDisp);
+    CComQIPtr<IAccessible> spParent(spDisp);
+    long count = 0;
+    spParent->get_accChildCount(&count);
+
+    VARIANT v;
+    v.vt = VT_I4;
+    for (v.lVal = 1; v.lVal < count; ++v.lVal) // assume the last child is a buggy one
+    {
+        CComPtr<IDispatch> spDisp;
+        if (FAILED(spParent->get_accChild(v, &spDisp)))
+            continue;
+        CComQIPtr<IAccessible> pAccessible(spDisp);
+        if (DoExtractText(pAccessible, pt, rpszWord, rpszText))
+            return true;
+    }
+
+    return false;
+}
+
+bool ChromeTextExtractor::DoExtractText(IAccessible* pAccessible,
+        POINT pt,
+        char*& rpszWord, char*& rpszText)
+{
+    CComQIPtr<IServiceProvider> pServiceProvider(pAccessible);
 	if (!pServiceProvider)
 		return false;
 
@@ -710,6 +750,9 @@ bool ChromeTextExtractor::ExtractText(
     hr = spAccessibleText->get_nCharacters(&length);
     if (FAILED(hr))
         return false;
+
+    //CComBSTR bstrStuff;
+    //hr = spAccessibleText->get_text(0, length, &bstrStuff);
 
     int l = 0;
     int h = length - 1;
