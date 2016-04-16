@@ -712,8 +712,11 @@ bool ChromeTextExtractor::ExtractText(
         return true;
 
     CComPtr<IDispatch> spDisp;
-    pAccessible->get_accParent(&spDisp);
+    if (FAILED(pAccessible->get_accParent(&spDisp)))
+        return false;
     CComQIPtr<IAccessible> spParent(spDisp);
+    if (!spParent)
+        return false;
     long count = 0;
     spParent->get_accChildCount(&count);
 
