@@ -17,6 +17,9 @@
       <UniqueIdentifier>{2ce88387-222f-442f-9579-4ae1a3fe224c}</UniqueIdentifier>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="snowball">
+      <UniqueIdentifier>{9d980317-8e09-49d8-9c85-def0114eddfa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AtlBaseModule.cpp">
@@ -45,6 +48,18 @@
     </ClCompile>
     <ClCompile Include="Thcoll.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="snowball\libstemmer\libstemmer.c">
+      <Filter>snowball</Filter>
+    </ClCompile>
+    <ClCompile Include="snowball\runtime\api.c">
+      <Filter>snowball</Filter>
+    </ClCompile>
+    <ClCompile Include="snowball\src_c\stem_KOI8_R_russian.c">
+      <Filter>snowball</Filter>
+    </ClCompile>
+    <ClCompile Include="snowball\runtime\utilities.c">
+      <Filter>snowball</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

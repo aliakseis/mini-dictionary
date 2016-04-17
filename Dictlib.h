@@ -15,13 +15,17 @@ void GetExeDir(LPSTR szPath);
 
 inline unsigned char ToLowerCase(char ch)
 {
+    if (ch == 0xA8)
+        return 0xB8;
 	return char(ch | 0x20);
 }
 
 inline bool IsAlpha(char ch)
 {
-	if (BYTE(ch) >= 192)
+    if (BYTE(ch) >= 192 || ch == 0xA8 || ch == 0xB8)
 		return true;
+    if (BYTE(ch) >= 128)
+        return false;
 	BYTE b = ToLowerCase(ch);
 	return b >= 'a' && b <= 'z';
 }
@@ -310,8 +314,8 @@ class mydict : private mycollection
 	int findnextrec(mybuf sbuf,asubident asidnt);
 	int findprevrec(mybuf sbuf,asubident asidnt,int vol);
 
-	Ident firstident(const char *ss, char *substring = NULL);
-	Ident nextident();
+	Ident firstident(const char *ss, char *substring = NULL, bool sameOrGreater = false);
+    Ident nextident(char *substring = NULL);
 	void insertbyfind(Ident ident);
 	int getcurp() { return curp; }
 
@@ -424,7 +428,10 @@ class myrusdict:public mydict
 		cumFreqs = other->cumFreqs;
 	}
 	virtual void expfunc(char *dest, mystring& s);
-	virtual mydict *newsimilar() { return new(nothrow) myrusdict(this); }
+
+    virtual Ident first_similar(char *ss, char *substring);
+
+    virtual mydict *newsimilar() { return new(nothrow)myrusdict(this); }
 	virtual bool IsCyrillic() { return TRUE; }
 
  protected:

@@ -2,11 +2,68 @@
 
 #include "dictlib.h"
 
+#include "snowball/include/libstemmer.h"
+
 #include <algorithm>
 
 #pragma intrinsic(memcpy, memset, memcmp, strlen, strcat)
 
 static const char id[]="AS";
+
+
+const unsigned char koi82win[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x95, 0x00, 0x00,
+    0x00, 0x00, 0xa0, 0x00, 0xb0, 0x00, 0xb7, 0x00,
+    0x00, 0x00, 0x00, 0xb8, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0xa8, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa9,
+    0xfe, 0xe0, 0xe1, 0xf6, 0xe4, 0xe5, 0xf4, 0xe3,
+    0xf5, 0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee,
+    0xef, 0xff, 0xf0, 0xf1, 0xf2, 0xf3, 0xe6, 0xe2,
+    0xfc, 0xfb, 0xe7, 0xf8, 0xfd, 0xf9, 0xf7, 0xfa,
+    0xde, 0xc0, 0xc1, 0xd6, 0xc4, 0xc5, 0xd4, 0xc3,
+    0xd5, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce,
+    0xcf, 0xdf, 0xd0, 0xd1, 0xd2, 0xd3, 0xc6, 0xc2,
+    0xdc, 0xdb, 0xc7, 0xd8, 0xdd, 0xd9, 0xd7, 0xda
+};
+
+const unsigned char win2koi8[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x95, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15,
+    0xb3, 0xbf, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x9c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x9e,
+    0xa3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xe1, 0xe2, 0xf7, 0xe7, 0xe4, 0xe5, 0xf6, 0xfa,
+    0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef, 0xf0,
+    0xf2, 0xf3, 0xf4, 0xf5, 0xe6, 0xe8, 0xe3, 0xfe,
+    0xfb, 0xfd, 0xff, 0xf9, 0xf8, 0xfc, 0xe0, 0xf1,
+    0xc1, 0xc2, 0xd7, 0xc7, 0xc4, 0xc5, 0xd6, 0xda,
+    0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0,
+    0xd2, 0xd3, 0xd4, 0xd5, 0xc6, 0xc8, 0xc3, 0xde,
+    0xdb, 0xdd, 0xdf, 0xd9, 0xd8, 0xdc, 0xc0, 0xd1
+};
+
+void win_koi(char *buff)
+{
+    for (; *buff; ++buff) {
+        if ((*buff & 0x80) && (win2koi8[*buff & 0x7F] != 0))
+            *buff = win2koi8[*buff & 0x7F];
+    }
+}
+
+void koi_win(char *buff)
+{
+    for (; *buff; ++buff) {
+        if ((*buff & 0x80) && (koi82win[*buff & 0x7F] != 0))
+            *buff = koi82win[*buff & 0x7F];
+    }
+}
 
 
 inline size_t strlenx(const char *string)
@@ -960,7 +1017,7 @@ int mydict::findprevrec(mybuf sbuf,asubident asidnt,int vol)
 	}
 }
 
-Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
+Ident mydict::firstident(const char *ss, char *substring /*= NULL*/, bool sameOrGreater /*= false*/)
 {
 	if (pins == NULL) 
 		pins = new(nothrow) myinsertrec;
@@ -992,24 +1049,17 @@ Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
 
 	pins->bpid=0;
 	if (pins->bptr != 0
-		&& compare(pins->mystrbuf[pins->bpid = pins->bptr-1], pins->myssample) == 0)
+        && (pins->bpid = pins->bptr - 1, 
+            sameOrGreater || compare(pins->mystrbuf[pins->bpid], pins->myssample) == 0))
 	{
 		if (substring != NULL)
-			expfunc(substring, pins->myssample);
-		return pins->myidbuf[pins->bpid];
+            expfunc(substring, pins->mystrbuf[pins->bpid]);
+        return pins->myidbuf[pins->bpid];
 	}
 	else
 	{
-		if (substring != NULL)
+        if (substring != NULL && !sameOrGreater)
 		{
-            //mystring prev;
-			//if (pins->bptr < pins->bufsize)
-			//	prev = pins->mystrbuf[pins->bptr];
-			//else if (pins->myp > 0)
-			//	prev = ((bucket_rec*) at(pins->myp - 1))->buf;
-			//else
-			//	return END_OF_DATA;
-
             if (pins->bptr >= pins->bufsize && pins->myp <= 0)
                 return END_OF_DATA;
 
@@ -1046,7 +1096,7 @@ Ident mydict::firstident(const char *ss, char *substring /*= NULL*/)
 	}
 }
 
-Ident mydict::nextident()
+Ident mydict::nextident(char *substring /*= NULL*/)
 {
 	if (pins->myssample[0] == 0) 
 		return EMPTY_STRING;
@@ -1061,9 +1111,16 @@ Ident mydict::nextident()
 			return END_OF_DATA;
 	}
 	pins->bpid--;
-	if (compare(pins->mystrbuf[pins->bpid],pins->myssample)==0)
-		return pins->myidbuf[pins->bpid];
-	else return END_OF_DATA;
+    if (substring == NULL)
+    {
+        if (compare(pins->mystrbuf[pins->bpid], pins->myssample) != 0)
+            return END_OF_DATA;
+    }
+    else
+    {
+        expfunc(substring, pins->mystrbuf[pins->bpid]);
+    }
+    return pins->myidbuf[pins->bpid];
 }
 
 void mydict::insertbyfind(Ident ident)
@@ -1857,4 +1914,59 @@ void myrusdict::expfunc(char *dest, mystring& s)
 		else dest[i]=achar[ch];
 	}
 	dest[sb[0]]='\0';
+}
+
+Ident myrusdict::first_similar(char *sWord, char *substring)
+{
+    RETURN_VALID_IDENT(firstident(sWord, substring));
+
+    static sb_stemmer * const russian_stemmer = sb_stemmer_new("russian", "KOI8_R");
+
+    int iWordLen = strlen(sWord);
+    if (iWordLen < 2)
+        return END_OF_DATA;
+
+    while (iWordLen > 0 && !IsAlpha(sWord[iWordLen - 1]))
+        iWordLen--;
+    if (iWordLen < 2)
+        return END_OF_DATA;
+    sWord[iWordLen] = 0;
+
+    for (int i = iWordLen; --i >= 0;)
+        sWord[i] = ToLowerCase(sWord[i]);
+
+    win_koi(sWord);
+
+    const sb_symbol* stem = sb_stemmer_stem(russian_stemmer,
+        (const sb_symbol *)sWord, iWordLen);
+    if (!stem)
+        return END_OF_DATA;
+
+    const int stem_length = sb_stemmer_length(russian_stemmer);
+    if (stem_length < 3)
+        return END_OF_DATA;
+    memcpy(sWord, stem, stem_length);
+    sWord[stem_length] = '\0';
+
+    koi_win(sWord);
+
+    char buffer[BUFFER_SIZE];
+    int minLength = BUFFER_SIZE;
+    Ident result = END_OF_DATA;
+    for (Ident id = firstident(sWord, buffer, true)
+        ; id < EMPTY_STRING
+        ; id = nextident(buffer))
+    {
+        const int length = strlen(buffer);
+        if (length < stem_length || memcmp(buffer, sWord, stem_length) != 0)
+            break;
+        if (length < minLength)
+        {
+            minLength = length;
+            strcpy(substring, buffer);
+            result = id;
+        }
+    }
+
+    return result;
 }
