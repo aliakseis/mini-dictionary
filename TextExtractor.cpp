@@ -728,6 +728,18 @@ bool ChromeTextExtractor::ExtractText(
         if (FAILED(spParent->get_accChild(v, &spDisp)))
             continue;
         CComQIPtr<IAccessible> pAccessible(spDisp);
+        if (!pAccessible)
+            continue;
+
+        long screenLeft, screenTop, screenWidth, screenHeight;
+        VARIANT v;
+        v.vt = VT_I4;
+        v.lVal = CHILDID_SELF;
+        if (FAILED(pAccessible->accLocation(&screenLeft, &screenTop, &screenWidth, &screenHeight, v))
+                || pt.x < screenLeft || pt.x >= screenLeft + screenWidth
+                || pt.y < screenTop || pt.y >= screenTop + screenHeight)
+            continue;
+
         if (DoExtractText(pAccessible, pt, rpszWord, rpszText))
             return true;
     }

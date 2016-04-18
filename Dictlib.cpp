@@ -1762,7 +1762,6 @@ void myengdict::expfunc(char *dest, mystring& s)
 		return id;					\
 }
 
-extern int stem(char * p, int i, int j);
 
 Ident myengdict::first_similar(char *sWord, char *substring)
 {
@@ -1880,7 +1879,19 @@ Ident myengdict::first_similar(char *sWord, char *substring)
 		RETURN_VALID_IDENT(firstident(sNewWord, substring));	
     }
 
-    sWord[stem(sWord, 0, iWordLen - 1) + 1] = 0;
+    static sb_stemmer * const english_stemmer = sb_stemmer_new("english", "ISO_8859_1");
+
+    const sb_symbol* stem = sb_stemmer_stem(english_stemmer,
+        (const sb_symbol *)sWord, iWordLen);
+    if (!stem)
+        return END_OF_DATA;
+
+    const int stem_length = sb_stemmer_length(english_stemmer);
+    if (stem_length < 3)
+        return END_OF_DATA;
+    memcpy(sWord, stem, stem_length);
+    sWord[stem_length] = '\0';
+
     RETURN_VALID_IDENT(firstident(sWord, substring));	
 
     return END_OF_DATA;

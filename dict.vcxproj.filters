@@ -31,9 +31,6 @@
     <ClCompile Include="Dictlib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PorterStemmer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ProgressRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,6 +56,9 @@
       <Filter>snowball</Filter>
     </ClCompile>
     <ClCompile Include="snowball\runtime\utilities.c">
+      <Filter>snowball</Filter>
+    </ClCompile>
+    <ClCompile Include="snowball\src_c\stem_ISO_8859_1_english.c">
       <Filter>snowball</Filter>
     </ClCompile>
   </ItemGroup>

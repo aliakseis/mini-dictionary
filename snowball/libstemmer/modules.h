@@ -12,7 +12,7 @@
 //#include "../src_c/stem_UTF_8_danish.h"
 //#include "../src_c/stem_ISO_8859_1_dutch.h"
 //#include "../src_c/stem_UTF_8_dutch.h"
-//#include "../src_c/stem_ISO_8859_1_english.h"
+#include "../src_c/stem_ISO_8859_1_english.h"
 //#include "../src_c/stem_UTF_8_english.h"
 //#include "../src_c/stem_ISO_8859_1_finnish.h"
 //#include "../src_c/stem_UTF_8_finnish.h"
@@ -86,7 +86,7 @@ static struct stemmer_modules modules[] = {
   //{"en", ENC_UTF_8, english_UTF_8_create_env, english_UTF_8_close_env, english_UTF_8_stem},
   //{"eng", ENC_ISO_8859_1, english_ISO_8859_1_create_env, english_ISO_8859_1_close_env, english_ISO_8859_1_stem},
   //{"eng", ENC_UTF_8, english_UTF_8_create_env, english_UTF_8_close_env, english_UTF_8_stem},
-  //{"english", ENC_ISO_8859_1, english_ISO_8859_1_create_env, english_ISO_8859_1_close_env, english_ISO_8859_1_stem},
+  {"english", ENC_ISO_8859_1, english_ISO_8859_1_create_env, english_ISO_8859_1_close_env, english_ISO_8859_1_stem},
   //{"english", ENC_UTF_8, english_UTF_8_create_env, english_UTF_8_close_env, english_UTF_8_stem},
   //{"es", ENC_ISO_8859_1, spanish_ISO_8859_1_create_env, spanish_ISO_8859_1_close_env, spanish_ISO_8859_1_stem},
   //{"es", ENC_UTF_8, spanish_UTF_8_create_env, spanish_UTF_8_close_env, spanish_UTF_8_stem},
@@ -172,7 +172,7 @@ static struct stemmer_modules modules[] = {
 static const char * algorithm_names[] = {
   //"danish", 
   //"dutch", 
-  //"english", 
+  "english", 
   //"finnish", 
   //"french", 
   //"german", 
