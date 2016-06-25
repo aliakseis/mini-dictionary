@@ -346,6 +346,8 @@ class mydict : private mycollection
 				return false;
 		return true;
 	}
+    bool isUsingPrivateDir() const { return is_using_private_dir; }
+    void setUsingPrivateDir();
 
  protected:
      dictmodetype dictmode;
@@ -369,6 +371,8 @@ class mydict : private mycollection
 
 	unsigned short flags;
 
+    bool is_using_private_dir;
+
  private:
 	void CommonConstruct()
 	{
@@ -380,6 +384,7 @@ class mydict : private mycollection
 		pins = NULL;
 		offsets = NULL;
 		flags = 0;
+        is_using_private_dir = false;
 	}
 	int subextract(BYTE* buf,mybuf psbuf,int mysize, int nVersion);
 	int extractrec(mybuf psbuf, asubident pasidnt, int nr);

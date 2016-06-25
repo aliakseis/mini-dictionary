@@ -243,16 +243,20 @@ const SCROLLKEYS key2scroll [] =
 enum { NUMKEYS = sizeof key2scroll / sizeof key2scroll[0] };
 
 
-BOOL g_bCyrillic, g_bUseHook, g_bCapitalLetters, 
-	g_bSoftGray, g_bMinimizeToTray;
+BOOL g_bCyrillic;
+BOOL g_bUseHook;
+BOOL g_bCapitalLetters;
+BOOL g_bSoftGray;
+BOOL g_bMinimizeToTray;
+BOOL g_bUsingPrivateDir;
 
 int g_nTranslationBalloon;
 
 HHOOK g_hhook;
 
-const BYTE xlat[]={0xD4,0xC8,0xD1,0xC2,0xD3,0xC0,0xCF,0xD0,
-	0xD8,0xCE,0xCB,0xC4,0xDC,0xD2,0xD9,
-	0xC7,0xC9,0xCA,0xDB,0xC5,0xC3,0xCC,0xD6,0xD7,0xCD,0xDF};
+const BYTE xlat[] = { 0xD4, 0xC8, 0xD1, 0xC2, 0xD3, 0xC0, 0xCF, 0xD0,
+    0xD8, 0xCE, 0xCB, 0xC4, 0xDC, 0xD2, 0xD9,
+    0xC7, 0xC9, 0xCA, 0xDB, 0xC5, 0xC3, 0xCC, 0xD6, 0xD7, 0xCD, 0xDF };
 
 LRESULT CALLBACK MsgHookProc(int code,WPARAM wParam,LPARAM lParam)
 {
@@ -483,6 +487,7 @@ const char szCapitalLetters[]	= "CapitalLetters";
 const char szSoftGray[]	= "SoftGray";
 const char szTranslationBalloon[] = "TranslationBalloon";
 const char szMinimizeToTray[] = "MinimizeToTray";
+const char szUsingPrivateDir[] = "UsingPrivateDir";
 
 const char szEngFName[] = "dct.dbe";
 const char szRusFName[] = "dct.dbr";
@@ -1097,6 +1102,8 @@ public:
 		m_szbuf[0] = 0;
 	}
 
+    void UpdateUsingPrivateDir();
+
 private:
 	const int m_NumRows;
 	mydict *m_pleftd,*m_prightd;
@@ -1173,6 +1180,13 @@ MainWindow::MainWindow()
 
 	m_pleftd = new(nothrow) myengdict(szEngFName);
 	m_prightd = new(nothrow) myrusdict(szRusFName);
+
+    g_bUsingPrivateDir = GetPrivateProfileInt(szSettingsSection, szUsingPrivateDir, FALSE, GetIniFilename());
+    if (g_bUsingPrivateDir)
+    {
+        m_pleftd->setUsingPrivateDir();
+        m_prightd->setUsingPrivateDir();
+    }
 
 	Ident left_ident = m_pleftd->medi_load();
 	Ident right_ident = m_prightd->medi_load();
@@ -1666,6 +1680,9 @@ void MainWindow::delitems()
 	m_pleftd->memo2medi();
 	if (m_ident != m_prightd->medi_load()) 
 		exit(EXIT_FAILURE);
+
+    UpdateUsingPrivateDir();
+
 	SetCursor(hCursorOld);
 	m_bufptr = 0;
 	putfirst("");
@@ -1804,6 +1821,9 @@ void MainWindow::insert()
 	m_pleftd->memo2medi();
 	if (m_prightd->medi_load() != m_ident) 
 		exit(EXIT_FAILURE);
+
+    UpdateUsingPrivateDir();
+
 	SetCursor(hCursorOld);
 	putfirst("");
 }
@@ -1874,6 +1894,8 @@ void MainWindow::compress()
 		m_pleftd = m_prightd;
 		m_prightd = tmp;
 	}
+
+    UpdateUsingPrivateDir();
 
 	SetCursor(hCursorOld);
 	m_bufptr=0;
@@ -2155,6 +2177,16 @@ void MainWindow::SetFilterMode(bool filter)
 	}
 }
 
+void MainWindow::UpdateUsingPrivateDir()
+{
+    if (!g_bUsingPrivateDir
+        && m_pleftd->isUsingPrivateDir()
+        && m_prightd->isUsingPrivateDir())
+    {
+        WriteProfileInt(szSettingsSection, szUsingPrivateDir, TRUE);
+        g_bUsingPrivateDir = TRUE;
+    }
+}
 
 static POINT g_cursorPos;
 static bool g_bStillCursor;

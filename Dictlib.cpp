@@ -353,7 +353,8 @@ bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 	for (int i = 0; i < count; ++i) 
 	{
 		p=(bucket_rec*)at(i);
-		if (p==NULL)return FALSE;
+		if (p==NULL)
+            return FALSE;
 		result=_lwrite(f,(LPSTR)&p->buf[p->get_idsize() + p->buf[0] + 1],
 				p->get_datasize());
 		if (result==(UINT)HFILE_ERROR) 
@@ -367,10 +368,21 @@ bool mydict::store(unsigned short flags_, bool bSequentialIds /*= false*/)
 	_lclose(f);
 	if (result == (UINT)HFILE_ERROR) 
 		return false;
-	DeleteFile(dictpath);
+
+    if (!DeleteFile(dictpath))
+    {
+        Sleep(1);
+        if (!DeleteFile(dictpath))
+        {
+            if (isUsingPrivateDir())
+                return false;
+            setUsingPrivateDir();
+        }
+    }
+
 	MoveFile(GetTempFilePath(), dictpath);
 	flags = flags_;
-	return TRUE;
+	return true;
 }
 
 void mydict::memo2medi()
@@ -1430,6 +1442,14 @@ int mydict::getMatchingCount(const char *s)
 	return nCount;
 }
 
+void mydict::setUsingPrivateDir()
+{
+    if (!is_using_private_dir)
+    {
+        strcat(dictpath, ".pri");
+        is_using_private_dir = true;
+    }
+}
 
 struct TreeHelper
 {
