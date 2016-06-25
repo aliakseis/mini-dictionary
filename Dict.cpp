@@ -2377,11 +2377,6 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 }
 
 
-#if _ATL_VER < 0x0700
-CComModule _Module;
-#endif
-
-
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
     ::CreateMutex(NULL, FALSE, "9B46C260-D121-461d-ACA9-D15681658A95");
@@ -2404,10 +2399,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
     const bool coUnitialize = S_OK == CoInitialize(NULL);
     InitCommonControls();
 
-#if _ATL_VER < 0x0700
-    _Module.Init( NULL, hInstance );
-#endif
-
     MainWindow* pWnd = new(nothrow)MainWindow;
 
     pWnd->ShowWindow(nCmdShow);
@@ -2420,10 +2411,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
     }
 
     delete pWnd;
-
-#if _ATL_VER < 0x0700
-    _Module.Term();
-#endif
 
     if (coUnitialize)
     {

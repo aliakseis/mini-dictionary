@@ -70,11 +70,6 @@
 using namespace ATL;
 
 
-#if _ATL_VER < 0x0700
-extern CComModule _Module;
-#endif
-
-
 #include <atlwin.h>
 #include <atlcom.h>
 
