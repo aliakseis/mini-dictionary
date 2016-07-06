@@ -25,6 +25,26 @@ inline LPWSTR A2W_(LPCSTR _lpa)
 		ATLA2WHELPER((LPWSTR) malloc(_convert*2), _lpa, _convert, 1251));
 }
 
+void SetForegroundWindowInternal(HWND hWnd)
+{
+    if (!hWnd || !::IsWindow(hWnd) || ::SetForegroundWindow(hWnd)) 
+        return;
+
+    //to unlock SetForegroundWindow we need to imitate pressing [Alt] key
+    bool bPressed = false;
+    if ((::GetAsyncKeyState(VK_MENU) & 0x8000) == 0)
+    {
+        bPressed = true;
+        ::keybd_event(VK_MENU, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+    }
+
+    ::SetForegroundWindow(hWnd);
+
+    if (bPressed)
+    {
+        ::keybd_event(VK_MENU, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+    }
+}
 
 class CSubStringSearch
 {
@@ -663,7 +683,8 @@ void LoadToTray( HWND    hWnd,
 
 /////////////////////////////////////////////////////////////////////////
 
-#define WM_TRAY_NOTIFY (WM_APP + 1000)
+enum { WM_TRAY_NOTIFY = WM_APP + 1000 };
+enum { WM_RESTORE = WM_APP + 1001 };
 
 enum { FLAG_IDS_REORDERED = 1 };
 
@@ -725,6 +746,7 @@ public:
       MESSAGE_HANDLER( WM_LBUTTONDOWN, OnLButtonDown )
       MESSAGE_HANDLER( WM_TIMER, OnTimer )
       MESSAGE_HANDLER( WM_TRAY_NOTIFY, OnTrayNotify )
+      MESSAGE_HANDLER( WM_RESTORE, OnRestore )
 
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_CHANGE, change)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_TAG, tag)
@@ -845,6 +867,7 @@ public:
 		if (WM_LBUTTONUP == lParam)
 		{
 			Shell_NotifyIcon( NIM_DELETE, &g_tnd ); // delete from the status area
+            memset(&g_tnd, 0, sizeof(g_tnd));
 			ShowWindow( SW_SHOW );
 			SetForegroundWindow(*this);
 			return 0;
@@ -853,7 +876,28 @@ public:
 		return 0;
 	}
 
-	LRESULT OnKeyDown( UINT, WPARAM wParam, LPARAM, BOOL& )
+    LRESULT OnRestore(UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        Shell_NotifyIcon(NIM_DELETE, &g_tnd); // delete from the status area
+        memset(&g_tnd, 0, sizeof(g_tnd));
+        ShowWindow(SW_SHOW);
+        SetForegroundWindowInternal(*this);
+        if (lParam)
+        {
+            const char* s = (const char*)lParam;
+            if (wParam)
+            {
+                change(s);
+            }
+            else
+            {
+                putfirst(s);
+            }
+        }
+        return 0;
+    }
+
+    LRESULT OnKeyDown(UINT, WPARAM wParam, LPARAM, BOOL&)
 	{
 		if(wParam==VK_BACK) 
 		{
@@ -1087,9 +1131,9 @@ public:
 	BOOL putnext();
 	void reread();
 	void putprev();
-	void putfirst(char *s);
+	void putfirst(const char *s);
 	void putfirstbypos(int pos);
-	void change();
+    void change(const char *s = NULL);
 	void delitems();
 	void insert();
 	void tag();
@@ -1601,7 +1645,7 @@ void MainWindow::showbar()
 	ReleaseDC( DC );
 }
 
-void MainWindow::putfirst(char *s)
+void MainWindow::putfirst(const char *s)
 {
 	m_pleftd->findstartrec(m_a, m_as, s, m_strsamount, m_botRptr);
 	m_botCurp = m_pleftd->getcurp();
@@ -1619,7 +1663,7 @@ void MainWindow::putfirstbypos(int pos)
 	putnext();
 }
 
-void MainWindow::change()
+void MainWindow::change(const char *s)
 {
 	SetFilterMode();
 	g_szSearchStr[0] = 0;
@@ -1632,7 +1676,7 @@ void MainWindow::change()
 	m_pleftd = m_prightd;
 	m_prightd = p;
 	ResetPage();
-	putfirst(m_st_right[m_ip]);
+	putfirst(s? s : m_st_right[m_ip]);
 }
 
 const char szWarning[] = "Warning:";
@@ -2192,6 +2236,15 @@ static POINT g_cursorPos;
 static bool g_bStillCursor;
 static volatile HWND g_hwndToolTip;
 
+static HHOOK g_hhkLowLevelKybd;
+
+static MainWindow* g_pWnd;
+
+static bool g_swapSides;
+static search_buf g_balloonString;
+static bool g_controlHit;
+
+static HWND g_hWndChild;
 
 class CSelfDestroyingToolTip: public CWindowImpl< CSelfDestroyingToolTip >
 {
@@ -2223,7 +2276,9 @@ private:
 
    void OnFinalMessage( HWND hWnd )
    {
-		g_hwndToolTip = NULL;
+        UnhookWindowsHookEx(g_hhkLowLevelKybd);
+        g_hhkLowLevelKybd = NULL;
+        g_hwndToolTip = NULL;
 		::KillTimer(hWnd, IDEVT_TIMEOUT);
 		delete this;
    }
@@ -2261,15 +2316,68 @@ void HideBalloon()
 {
 	if (g_hwndToolTip != NULL)
 	{
-		::DestroyWindow(g_hwndToolTip);
+        UnhookWindowsHookEx(g_hhkLowLevelKybd);
+        g_hhkLowLevelKybd = NULL;
+        ::DestroyWindow(g_hwndToolTip);
 		g_hwndToolTip = NULL;
 	}
 }
 
 
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode,
+    WPARAM wParam,
+    LPARAM lParam)
+{
+    bool controlHit = false;
+    if (nCode == HC_ACTION)
+    {
+        switch (wParam)
+        {
+        case WM_SYSKEYDOWN:
+        case WM_SYSKEYUP:
+            HideBalloon();
+            break;
+
+        case WM_KEYDOWN:
+        case WM_KEYUP:
+
+            // Get hook struct
+            PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lParam;
+            if ((p->vkCode == VK_LCONTROL || p->vkCode == VK_RCONTROL)
+                && (p->flags & LLKHF_ALTDOWN) == 0)
+            {
+                if ((p->flags & LLKHF_UP) != 0)
+                {
+                    if (g_controlHit)
+                    {
+                        HideBalloon();
+                        g_pWnd->PostMessage(WM_RESTORE, g_swapSides, (LPARAM)(void*)g_balloonString);
+                    }
+                }
+                else
+                {
+                    controlHit = true;
+                }
+            }
+            else
+            {
+                HideBalloon();
+            }
+            break;
+
+        }// End switch
+    }// End if
+
+    g_controlHit = controlHit;
+
+    // Did we trap a key??
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}// End LowLevelKeyboardProc
+
+
+
 enum { MAX_TIP_ROWS = 20 };
 
-static HWND hWndChild;
 
 LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 {
@@ -2290,7 +2398,7 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 	else if (g_bStillCursor)
 	{
 		if (g_hwndToolTip != NULL 
-				&& (IsMouseButtonDown() || hWndChild != WindowFromPoint(pt)))
+                && (IsMouseButtonDown() || g_hWndChild != WindowFromPoint(pt)))
 			HideBalloon();
 		return 0;
 	}
@@ -2300,18 +2408,19 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 	if (IsMouseButtonDown())
 		return 0;
             
-	hWndChild = WindowFromPoint(pt);
+    g_hWndChild = WindowFromPoint(pt);
 
 	char* pszWord = 0;
 	char* pszText = 0;
 
-	if (!ExtractText(hWndChild, g_nTranslationBalloon, pt, pszWord, pszText))
+    if (!ExtractText(g_hWndChild, g_nTranslationBalloon, pt, pszWord, pszText))
 		return 0;
 
 
 	mydict* pleftd = m_pleftd;
 	mydict* prightd = m_prightd;
-	if (m_pleftd->getMatchingCount(pszWord) < m_prightd->getMatchingCount(pszWord))
+    g_swapSides = m_pleftd->getMatchingCount(pszWord) < m_prightd->getMatchingCount(pszWord);
+    if (g_swapSides)
 	{
 		pleftd = m_prightd;
 		prightd = m_pleftd;
@@ -2335,6 +2444,8 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 
 	if (id < EMPTY_STRING)
 	{
+        strcpy(g_balloonString, output);
+
 		int iRowCnt = MAX_TIP_ROWS - 1;
 		do
 		{
@@ -2375,13 +2486,13 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 			TTTOOLINFOW	ti = { 
 				offsetof(TTTOOLINFOW, lParam),
 				TTF_TRANSPARENT | TTF_CENTERTIP,
-				hWndChild
+                g_hWndChild
 			};
 
 			ti.lpszText = A2W_(output);
 
 			((POINT&)ti.rect) = g_cursorPos;
-			::ScreenToClient(hWndChild, (POINT*)&ti.rect);
+            ::ScreenToClient(g_hWndChild, (POINT*)&ti.rect);
 			ti.rect.right = ti.rect.left;
 			ti.rect.bottom = ti.rect.top;
 			
@@ -2400,6 +2511,12 @@ LRESULT MainWindow::OnTimer( UINT, WPARAM, LPARAM, BOOL& )
 				pSelfDestroyingToolTip->SubclassWindow(g_hwndToolTip);
 				pSelfDestroyingToolTip->SetTimeout(20000);
 			}
+
+            g_hhkLowLevelKybd = SetWindowsHookEx(
+                WH_KEYBOARD_LL,
+                LowLevelKeyboardProc,
+                g_hInstance,
+                0);
 		}
 	}
 	free(pszText);
@@ -2418,8 +2535,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
         HWND hWndOther = FindWindow(MainWindow::szClassName, MainWindow::szClassName);
         if (hWndOther != NULL)
         {
-            ShowWindow(hWndOther, SW_SHOW);
-            SetForegroundWindow(hWndOther);
+            SendNotifyMessage(hWndOther, WM_RESTORE, 0, 0);
         }
         return 0;
     }
@@ -2431,9 +2547,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
     const bool coUnitialize = S_OK == CoInitialize(NULL);
     InitCommonControls();
 
-    MainWindow* pWnd = new(nothrow)MainWindow;
+    g_pWnd = new(nothrow)MainWindow;
 
-    pWnd->ShowWindow(nCmdShow);
+    g_pWnd->ShowWindow(nCmdShow);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
@@ -2442,7 +2558,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
         DispatchMessage(&msg);
     }
 
-    delete pWnd;
+    delete g_pWnd;
+    g_pWnd = NULL;
 
     if (coUnitialize)
     {

@@ -309,7 +309,7 @@ class mydict : private mycollection
 	void insertstr(char *ss, Ident ident);
 	void deletebyident(Ident ident);
 	void correctident(Ident oldidnt, Ident newidnt);
-	void findstartrec(mybuf sbuf, asubident asidnt, char *ss, int& nCount, int& nPos);
+	void findstartrec(mybuf sbuf, asubident asidnt, const char *ss, int& nCount, int& nPos);
 	int firstbypos(mybuf sbuf,asubident asidnt,int pos);
 	int findnextrec(mybuf sbuf,asubident asidnt);
 	int findprevrec(mybuf sbuf,asubident asidnt,int vol);

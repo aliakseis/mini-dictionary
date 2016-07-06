@@ -944,7 +944,7 @@ void mydict::deletebyident(Ident ident)
 
 
 
-void mydict::findstartrec(mybuf sbuf, asubident asidnt, char *ss, int& nCount, int& nPos)
+void mydict::findstartrec(mybuf sbuf, asubident asidnt, const char *ss, int& nCount, int& nPos)
 {
 	mystring ssample;
 	compfunc(ssample,ss);
