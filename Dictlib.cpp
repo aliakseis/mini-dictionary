@@ -1999,5 +1999,8 @@ Ident myrusdict::first_similar(char *sWord, char *substring)
         }
     }
 
+    if (result < EMPTY_STRING)
+        result = firstident(substring);
+
     return result;
 }
