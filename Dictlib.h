@@ -274,9 +274,9 @@ class mycollection: public THSortedCollection
 		}
  protected:
 		void DestructElement(void* item) { delete[] (BYTE*)item; }
-	  virtual void* keyOf(void FAR* item)
+	  virtual void* keyOf(void* item)
 	  { return &((bucket_rec*) item)->buf; }
-	  virtual int compare(void* key1,void* key2);
+	  virtual int compare(void* key1, void* key2);
 };
 
 class mydict : private mycollection
