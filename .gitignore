@@ -216,3 +216,6 @@ pip-log.txt
 .mr.developer.cfg
 
 out/
+
+dict.VC.db
+dict.VC.VC.opendb

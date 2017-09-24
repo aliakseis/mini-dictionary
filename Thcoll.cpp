@@ -167,13 +167,12 @@ bool THSortedCollection::search( void* key, int& index )
 {
     int l = 0;
     int h = count - 1;
-    int c = 0;
     bool res = false;
     while( l <= h )
 	{
 		int i = (l +  h) >> 1;
 		void* data = items[i];
-		 c = compare( keyOf( data ), key );
+		int c = compare( keyOf( data ), key );
 		if ( c < 0 )
 			 l = i + 1;
 		else

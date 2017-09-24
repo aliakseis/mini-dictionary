@@ -636,8 +636,6 @@ void subextractstr(mystring& mybuf,BYTE* buf, int shift, int nVersion)
 
 void mydict::extractstr(mystring& dest, int nr, int shift)
 {
-	int subsize;
-	BYTE *pp;
 	if (count==0) { dest[0]=0; return; }
 	bucket_rec* p=(bucket_rec*)at(nr);
 	if (!p) return;
@@ -651,13 +649,15 @@ void mydict::extractstr(mystring& dest, int nr, int shift)
 				&p->buf[p->get_idsize()+dest[0]+1], shift, p->get_version());
 			break;
 		case medi:
-			_llseek(fhandle, offsets[nr] + myoffset, 0);
-			subsize = p->get_datasize();
-			pp=new(nothrow) BYTE[subsize];
-			_lread(fhandle,(LPSTR)pp,subsize);
-			subextractstr(dest, pp, shift, p->get_version());
-			delete[] pp;
-			break;
+            {
+                _llseek(fhandle, offsets[nr] + myoffset, 0);
+                int subsize = p->get_datasize();
+                BYTE* pp = new(nothrow) BYTE[subsize];
+                _lread(fhandle, (LPSTR)pp, subsize);
+                subextractstr(dest, pp, shift, p->get_version());
+                delete[] pp;
+                break;
+            }
 		default: 
 			exit(EXIT_FAILURE);
 		}
@@ -720,13 +720,13 @@ found:
 
 void mydict::findbyident(char *dest, Ident ident)
 {
-	mystring s;
 	Ident col=ident;
 	int row=firstThat(mysearch,&col);
 	if (row!=-1) 
 	{
-		extractstr(s,row,col);
-		expfunc(dest,s);    
+        mystring s;
+        extractstr(s, row, col);
+        expfunc(dest, s);
 	}
 	else dest[0]='\0';
 }
@@ -839,7 +839,7 @@ void mydict::insertrec(mybuf psbuf,asubident pasidnt,int bsize,int nr)
 
 	memcpy(&p->buf[l + planessize + 1], buf, bp);
 
-	delete[] buf;
+	delete buf;
 	atsubst(nr, p);
 }
 

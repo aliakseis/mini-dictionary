@@ -12,7 +12,7 @@ enum
 class THCollection
 {
 public:
-    THCollection(int aLimit);
+    explicit THCollection(int aLimit);
     ~THCollection();
 
     void* at( int index );

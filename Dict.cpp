@@ -58,9 +58,8 @@ class CSubStringSearch
         int slen = strlen((const char*)str); 
         int pindx;  
         int cmppos; 
-        int endpos;
 
-        for( endpos = plen; endpos < slen ; )
+        for( int endpos = plen; endpos < slen ; )
 		{
            for( cmppos = endpos, pindx = plen;
                                  pindx >= 0 ;
@@ -78,15 +77,13 @@ class CSubStringSearch
 
     void compilePatternBM(unsigned char *ptrn)
 	{
-        int c;
-
         pattern = ptrn; 
 		plen = strlen((char*)ptrn);
 
-        for(c = 0; c < 256; c++)
+        for(int c = 0; c < 256; c++)
                 d[c] = plen;
 		plen--;
-        for(c = 0; c < plen; c++)
+        for(int c = 0; c < plen; c++)
 		{
                 d[ pattern[c] |= 0x20 ] = plen - c;
 		}
@@ -95,7 +92,7 @@ class CSubStringSearch
 
 
 public:
-	void Init(char* szStr)
+    explicit CSubStringSearch(char* szStr)
 	{
 		compilePatternBM((unsigned char*)szStr);
 	}
@@ -1434,9 +1431,7 @@ BOOL MainWindow::putnext()
 	CSubStringSearch* pSearch = NULL;
 	if (m_filterMode)
 	{
-		pSearch = new(nothrow) CSubStringSearch;
-		if (pSearch)
-			pSearch->Init(g_szSearchStr);
+		pSearch = new(nothrow) CSubStringSearch(g_szSearchStr);
 		hashCheck = m_pleftd->MakeHash(g_szSearchStr, hash);
 	}
 
@@ -1536,9 +1531,7 @@ void MainWindow::putprev()
 		CSubStringSearch* pSearch = NULL;
 		if (m_filterMode)
 		{
-			pSearch = new(nothrow) CSubStringSearch;
-			if (pSearch)
-				pSearch->Init(g_szSearchStr);
+			pSearch = new(nothrow) CSubStringSearch(g_szSearchStr);
 			hashCheck = m_pleftd->MakeHash(g_szSearchStr, hash);
 		}
 

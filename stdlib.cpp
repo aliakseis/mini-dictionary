@@ -302,7 +302,7 @@ void WinMainCRTStartup()
 
 	ExitProcess(WinMain(GetModuleHandle(NULL)
 		, NULL, &g_chEndingZero, 
-		StartupInfo.dwFlags & STARTF_USESHOWWINDOW? StartupInfo.wShowWindow : SW_SHOWDEFAULT));
+		(StartupInfo.dwFlags & STARTF_USESHOWWINDOW)? StartupInfo.wShowWindow : SW_SHOWDEFAULT));
 }
 
 

@@ -89,7 +89,7 @@ struct recbase
 {
 	enum { FLAG_SEQUENTIAL_IDS = 0x80 };
 
-	int get_version()
+	int get_version() const
 	{
 		return (m_version > 1 || m_dataSize == 0 && m_idnr > 1)
 			? VERSION_PREHISTORIC : m_version;
@@ -99,19 +99,19 @@ struct recbase
 		return (VERSION_PREHISTORIC == get_version())
 			? get_oldDatasize() : m_dataSize; 
 	}
-	int get_numplanes() 
+	int get_numplanes() const
 	{ 
 		return (VERSION_PREHISTORIC == get_version())
 			? get_oldNumplanes() : m_numPlanes;
 	}
-	int get_idsize()	
+	int get_idsize() const
 	{ 
 		return is_sequential()
 			? sizeof(Ident) : get_idnr() * 2 + get_planessize(); 
 	}
 
-	int get_oldDatasize()  { return m_diskpos >> 19; }
-	int get_oldNumplanes() { return (m_diskpos >> 17) & 3; }
+	int get_oldDatasize()  const { return m_diskpos >> 19; }
+	int get_oldNumplanes() const { return (m_diskpos >> 17) & 3; }
 
 	void set(int numplanes, int datasize, int nIds)	
 	{
@@ -125,13 +125,13 @@ struct recbase
 	{
 		m_numPlanes = FLAG_SEQUENTIAL_IDS;
 	}
-	bool is_sequential()
+	bool is_sequential() const
 	{
 		return (VERSION_PREHISTORIC != get_version()) 
 			&& (FLAG_SEQUENTIAL_IDS & m_numPlanes);
 	}
 
-	int get_idnr()		
+	int get_idnr() const
 	{ 
 		return (VERSION_PREHISTORIC == get_version())
 			? (m_oldIdnr < 2 && get_oldDatasize() != 0)? m_oldIdnr + 256 : m_oldIdnr
@@ -139,8 +139,8 @@ struct recbase
 	}
 
 protected:
-	int get_planesize() { return (get_idnr() + 7) >> 3; }
-	int get_planessize(){ return get_planesize() * get_numplanes(); }
+	int get_planesize()  const { return (get_idnr() + 7) >> 3; }
+	int get_planessize() const { return get_planesize() * get_numplanes(); }
 
 private:
 	union
@@ -260,7 +260,7 @@ struct myinsertrec
 class mycollection: public THSortedCollection
 {
  public:
-	   mycollection(int aLimit):
+	   explicit mycollection(int aLimit):
 		  THSortedCollection(aLimit) {}
 	   ~mycollection()
 	   {
@@ -285,7 +285,7 @@ class mydict : private mycollection
      using mycollection::getCount;
      using mycollection::at;
 
-	mydict(const char* pth);
+	explicit mydict(const char* pth);
 	mydict() : mycollection(512) 
 	{
 		CommonConstruct();
@@ -401,8 +401,8 @@ class myengdict:public mydict
 {
  public:
 	enum { NUM_SYMBOLS = 31 };
-	myengdict(const char *pth):mydict(pth) { CommonConstruct(); }
-	myengdict(myengdict* other):mydict() 
+	explicit myengdict(const char *pth):mydict(pth) { CommonConstruct(); }
+	explicit myengdict(myengdict* other):mydict() 
 	{ 
 		CommonConstruct(); 
 		bAutoDeleteCumFreqs = false;
@@ -425,8 +425,8 @@ class myrusdict:public mydict
 {
  public:
 	enum { NUM_SYMBOLS = 37 };
-	myrusdict(const char *pth):mydict(pth) { CommonConstruct(); }
-	myrusdict(myrusdict* other):mydict()
+	explicit myrusdict(const char *pth):mydict(pth) { CommonConstruct(); }
+	explicit myrusdict(myrusdict* other):mydict()
 	{ 
 		CommonConstruct(); 
 		bAutoDeleteCumFreqs = false;
