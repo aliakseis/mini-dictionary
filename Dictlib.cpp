@@ -840,7 +840,8 @@ void mydict::insertrec(mybuf psbuf,asubident pasidnt,int bsize,int nr)
 	memcpy(&p->buf[l + planessize + 1], buf, bp);
 
 	delete buf;
-	atsubst(nr, p);
+    DestructElement(at(nr));
+    atPut(nr, p);
 }
 
 

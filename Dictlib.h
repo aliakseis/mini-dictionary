@@ -267,11 +267,6 @@ class mycollection: public THSortedCollection
 			freeAll();
 			setLimit(0);
 	   }
-	   void atsubst(int i, void* p)
-		{
-			 delete[] (BYTE*)at(i);
-			 atPut(i, p);
-		}
  protected:
 		void DestructElement(void* item) { delete[] (BYTE*)item; }
 	  virtual void* keyOf(void* item)
