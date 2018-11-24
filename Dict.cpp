@@ -678,6 +678,25 @@ void LoadToTray( HWND    hWnd,
 	Shell_NotifyIcon( NIM_ADD, &g_tnd ); // add to the taskbar's status area
 }
 
+typedef HRESULT(_stdcall *RegisterApplicationRestartT)(PCWSTR pwzCommandline, DWORD dwFlags);
+
+HRESULT RegisterApplicationRestartStub(PCWSTR pwzCommandline, DWORD dwFlags)
+{
+    HMODULE hModule = ::LoadLibrary(_T("kernel32.dll"));
+    if (hModule == NULL)
+        return E_FAIL;
+    RegisterApplicationRestartT proc =
+        reinterpret_cast<RegisterApplicationRestartT>(::GetProcAddress(hModule, "RegisterApplicationRestart"));
+    if (proc == NULL)
+    {
+        ::FreeLibrary(hModule);
+        return E_FAIL;
+    }
+    HRESULT ret = (proc)(pwzCommandline, dwFlags);
+    ::FreeLibrary(hModule);
+    return ret;
+}
+
 /////////////////////////////////////////////////////////////////////////
 
 enum { WM_TRAY_NOTIFY = WM_APP + 1000 };
@@ -744,6 +763,7 @@ public:
       MESSAGE_HANDLER( WM_TIMER, OnTimer )
       MESSAGE_HANDLER( WM_TRAY_NOTIFY, OnTrayNotify )
       MESSAGE_HANDLER( WM_RESTORE, OnRestore )
+      MESSAGE_HANDLER(WM_QUERYENDSESSION, OnQueryEndSession)
 
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_CHANGE, change)
 	  COMMAND_ID_HANDLER_NO_PARAMS(IDM_TAG, tag)
@@ -892,6 +912,12 @@ public:
             }
         }
         return 0;
+    }
+
+    LRESULT OnQueryEndSession(UINT /*uMsg*/, WPARAM /*wParam*/,
+        LPARAM /*lParam*/, BOOL & /*bHandled*/)
+    {
+        return TRUE; // allow automatic close
     }
 
     LRESULT OnKeyDown(UINT, WPARAM wParam, LPARAM, BOOL&)
@@ -2539,6 +2565,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 
     const bool coUnitialize = S_OK == CoInitialize(NULL);
     InitCommonControls();
+
+    RegisterApplicationRestartStub(L"", 0);
 
     g_pWnd = new(nothrow)MainWindow;
 
