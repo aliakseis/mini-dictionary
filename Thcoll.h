@@ -66,7 +66,6 @@ protected:
 	{
 		if (key1 < key2)
 			return -1;
-		else 
-			return (key1 > key2)? 1 : 0;
+		return (key1 > key2)? 1 : 0;
 	}
 };
