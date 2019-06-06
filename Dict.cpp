@@ -334,10 +334,6 @@ LRESULT CALLBACK MsgHookProc(int code,WPARAM wParam,LPARAM lParam)
 }
 
 
-long CALLBACK WndProc( HWND hWnd, UINT iMessage,
-	WPARAM wParam, LPARAM lParam );  
-
-
 enum 
 { 
 	INTERLIN = 16,
@@ -781,8 +777,6 @@ public:
 
 	void rollback(mydict* pdict, int size);
 	bool FixReorderedIds(mydict* pleftd, mydict* prightd);
-
-	long WndProc( UINT iMessage, WPARAM wParam, LPARAM lParam );
 
 	LRESULT OnPaint( UINT, WPARAM, LPARAM, BOOL& );
 
